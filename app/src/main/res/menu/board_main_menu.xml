@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/board_main_menu_board_list"
+        android:icon="@android:drawable/ic_menu_more"
+        android:title="게시판 목록"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/board_main_menu_write"
+        android:icon="@android:drawable/ic_menu_add"
+        android:title="글작성하기"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/board_main_menu_controller"
+        android:icon="@drawable/control_btn"
+        android:title="컨트롤메뉴"
+        app:showAsAction="always" />
+</menu>
