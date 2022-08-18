@@ -23,9 +23,22 @@
             </intent-filter>
             />
         </activity>
+
+        <provider
+            android:authorities="com.example.appgrouppurchasemaching.camera.file_provider"
+            android:name="androidx.core.content.FileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_path"/>
+        </provider>
+        
         <activity
             android:name=".intro.MainActivity"
             android:exported="true" />
     </application>
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION"/>
 </manifest>

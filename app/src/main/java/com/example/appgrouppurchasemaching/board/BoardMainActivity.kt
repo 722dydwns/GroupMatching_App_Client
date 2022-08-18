@@ -1,7 +1,10 @@
 package com.example.appgrouppurchasemaching.board
 
+import android.Manifest
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
@@ -26,12 +29,23 @@ class BoardMainActivity : AppCompatActivity() { //게시판 메인 액티비티
     //현재 선택된 게시판 목록 idx 값
     var selectedBoardType = 0 //기본값 - 0
 
+    //권한 확인 리스트
+    @RequiresApi(Build.VERSION_CODES.Q)
+    val permissionList = arrayOf(
+        Manifest.permission.READ_EXTERNAL_STORAGE,
+        Manifest.permission.ACCESS_MEDIA_LOCATION
+    )
+
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         //binding
         binding = ActivityBoardMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        //권한 요청 - 자동 콜백함수
+        requestPermissions(permissionList, 0)
 
         //전체 게시판(모두 포함하는) 추가가
         boardNameList.add("전체 게시판")

@@ -48,9 +48,9 @@ class BoardMainFragment : Fragment() { //게시판 목록 메인 프래그먼트
                     val boardListBuilder = AlertDialog.Builder(requireContext())
                     boardListBuilder.setTitle("게시판 목록")
                     boardListBuilder.setNegativeButton("취소", null)
-                            //여기서 게시판 목록 클릭하는 경우 이벤트 처리
+                    //여기서 게시판 목록 클릭하는 경우 이벤트 처리
                     boardListBuilder.setItems(act.boardNameList.toTypedArray()){ dialogInterface: DialogInterface, i: Int ->
-                        act.selectedBoardType = 1
+                        act.selectedBoardType = i //사용자 선택한 i에 따라
                         binding.boardMainToolbar.title = act.boardNameList[act.selectedBoardType]
                     }
                     boardListBuilder.show()
