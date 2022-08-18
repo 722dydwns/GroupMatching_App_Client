@@ -1466,6 +1466,736 @@ val boardNameList = ArrayList<String>()
 val boardIndexList = ArrayList<Int>()
 ```
 
-### **◾ 프래그먼트 [boardMainFragment.kt]**
+### **### **프래그먼트 [boardMainFragment.kt]**
 
 - 액티비티에 받아둔 데이터를 가져와서 띄움
+
+```kotlin
+override fun onCreateView(
+    inflater: LayoutInflater, container: ViewGroup?,
+    savedInstanceState: Bundle?
+): View? {
+    // Inflate the layout for this fragment
+
+    val act =activityas BoardMainActivity
+
+    //바인딩
+    binding = FragmentBoardMainBinding.inflate(inflater)
+    binding.boardMainToolbar.title= act.boardNameList[act.selectedBoardType]
+                                //-> 사용자 선택한 게시글 목록 idx 값에 따르 이름값을 title로 세팅하기
+    //게시판 항목 메뉴 추가하기
+    binding.boardMainToolbar.inflateMenu(R.menu.board_main_menu)
+    // 이 항목 메뉴 item 클릭 이벤트 처리
+    binding.boardMainToolbar.setOnMenuItemClickListener{
+//툴바 속 존재하는 메뉴item 클릭 시. 이벤트 처리
+        when(it.itemId){
+            R.id.board_main_menu_board_list-> {  //다이얼로그로 게시판 목록을 띄운다.
+                //액티비티에서 받아놨던 데이터 받기 위해 act
+                val act =activityas BoardMainActivity
+                //단 여기서 toTypedArray()로 변경해주어야 한다. Array 객체로 변경
+                val boardListBuilder = AlertDialog.Builder(requireContext())
+                boardListBuilder.setTitle("게시판 목록")
+                boardListBuilder.setNegativeButton("취소", null)
+                        //여기서 게시판 목록 클릭하는 경우 이벤트 처리
+                boardListBuilder.setItems(act.boardNameList.toTypedArray()){dialogInterface: DialogInterface, i: Int->
+										act.selectedBoardType = i
+										//바인딩으로 각 툴바 title을 재세팅
+                    binding.boardMainToolbar.title= act.boardNameList[act.selectedBoardType]
+}
+								boardListBuilder.show()
+                true //메뉴 클릭 시 무언가 작업했으므로 T 반환시킴
+            }
+            R.id.board_main_menu_write-> { //글쓰기 메뉴 클릭 시
+                val act =activityas BoardMainActivity
+                act.fragmentController("board_write", true, true)
+                true
+            }
+            R.id.board_main_menu_controller-> { //다른 항목 메뉴 컨트롤러 클릭 시,
+                // -> 프래그먼트 이동시킬 건데,
+                val act =activityas BoardMainActivity
+                act.fragmentController("menu_controller", true, true)
+                true
+            }
+
+            else -> false
+        }
+}
+```
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/b4cbd194-eff1-422b-bc07-e241ca603cb9/Untitled.png)
+
+---
+
+### **🟧 BoardWriteFragment.kt**
+
+- **게시글 작성 화면에서도 목록 (Spinner)구성 시, BoardMainActivity 속에 담아둔 데이터를 받아서 구성**해주어야 한다.
+- 스피너로 목록 작성하는 부분의 코드를 수정해서 **데이터 구성을 담는 작업을 수행**한다.
+    - **게시글 목록 화면에서 선택한 게시글 목록**이 → **게시글 작성 화면에서도 동일하게 나타남**
+    - → 이유: 게시판 선택 변수 selectedBoardType을 관련 프래그먼트를 관리하는 BoardMainActivity의 변수이기 때문에 여러 프래그먼트에서 공유가 가능하다.
+
+```kotlin
+//스피너 어댑터 생성 - 액티비티 속 데이터 가져와서 스피너 목록 구성
+val spinnerAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, act.boardNameList.drop(1))
+
+spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+binding.boardWriteType.adapter= spinnerAdapter
+
+//사용자가 선택한 게시글 목록에 따른 처리
+if(act.selectedBoardType == 0) { //'전체' 게시판 선택 시
+    binding.boardWriteType.setSelection(0)
+}else{
+    binding.boardWriteType.setSelection(act.selectedBoardType - 1)
+}
+```
+
+## 🟦 이미지 첨부 구현
+
+### ▶️ 이미지 첨부 구현
+
+- **게시글 작성 화면에서 카메라/앨범을 통해 사진을 가져와 이미지 뷰에 보여주는 작업 수행**
+
+---
+
+# **🙋🏻‍♀️ 1) 갤러리 연동**
+
+### **🟧 AndroidManifest.xml 에 카메라 관련 권한 추가**
+
+- **READ_EXTERNAL_STORAGE** : 외부 저장소에서 파일 읽기 권한
+- **ACEESS_MEDIA_LOCATION** : 미디어 위치 정보 액세스 권한
+
+```kotlin
+<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+<uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION"/>
+```
+
+### **🟧 BoardMainActivity.kt**
+
+- 위에서 추가한 권한에 대한 ‘확인’ 코드 작성
+
+```kotlin
+//권한 확인 리스트
+val permissionList =arrayOf(
+    Manifest.permission.READ_EXTERNAL_STORAGE,
+    Manifest.permission.ACCESS_MEDIA_LOCATION
+)
+```
+
+- onCreate() 메소드 내부에서 앱 실행  시, 사용자에게 권한 요청받는 콜백함수 작성
+
+```kotlin
+
+//권한 요청 - 자동 콜백함수
+requestPermissions(permissionList, 0)
+```
+
+### **🟧 res/xml 디렉토리 추가 → file_path.xml 작성**
+
+- 저장소 접근 경로를 xml 에 지정
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <external-path
+        name="storage/emulated/0"
+        path="."/>
+</paths>
+```
+
+### **🟧 AndroidManifest.xml 에 위의 xml 등록**
+
+```xml
+<provider
+    android:authorities="com.example.appgrouppurchasemaching.camera.file_provider"
+    android:name="androidx.core.content.FileProvider"
+    android:exported="false"
+    android:grantUriPermissions="true">
+    <meta-data
+        android:name="android.support.FILE_PROVIDER_PATHS"
+        android:resource="@xml/file_path"/>
+</provider>
+```
+
+# **🙋🏻‍♀️ 2) 카메라 연동**
+
+### **🟧 BoardWriteFragment.kt**
+
+- 카메라/갤러리 버튼 클릭 → 선택된 이미지가 이미지뷰에 Set 처리됨
+
+```kotlin
+package com.example.appgrouppurchasemaching.board
+
+import android.app.Activity
+import android.content.Intent
+import android.graphics.BitmapFactory
+import android.graphics.ImageDecoder
+import android.net.Uri
+import android.os.Build
+import android.os.Bundle
+import android.provider.MediaStore
+import androidx.fragment.app.Fragment
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import androidx.core.content.FileProvider
+import com.example.appgrouppurchasemaching.R
+import com.example.appgrouppurchasemaching.databinding.FragmentBoardWriteBinding
+import java.io.File
+
+class BoardWriteFragment : Fragment() {//글쓰기 프래그먼트 화면
+
+    //바인딩
+    lateinit var binding : FragmentBoardWriteBinding
+
+    //경로 담을 Uri 객체
+    lateinit var contentUri : Uri
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        // Inflate the layout for this fragment
+
+        //BoardMainActivity 에서 서버로부터 받아온 '게시글 목록'데이터 받기 위함
+        val act =activityas BoardMainActivity
+
+        //바인딩
+        binding = FragmentBoardWriteBinding.inflate(inflater)
+        binding.boardWriteToolbar.title= "게시글 작성"
+
+        //Back 버튼을 툴바 상단의 navigationIcon으로 추가한다.
+        val navIcon =
+            requireContext().getDrawable(androidx.appcompat.R.drawable.abc_ic_ab_back_material)
+        binding.boardWriteToolbar.navigationIcon= navIcon
+
+        //뒤로가기 네비게이션 클릭 이벤트 처리
+        binding.boardWriteToolbar.setNavigationOnClickListener{
+val act =activityas BoardMainActivity
+            //현재의 프래그먼트를 백스택에서 pop 제거 처리
+            act.fragmentRemoveBackStack("board_write")
+}
+
+//툴바 속 메뉴 세팅
+        binding.boardWriteToolbar.inflateMenu(R.menu.board_write_menu)
+        binding.boardWriteToolbar.setOnMenuItemClickListener{
+when (it.itemId) {
+                R.id.board_write_menu_camera-> { //카메라 클릭 시
+                    val filePath = requireContext().getExternalFilesDir(null).toString()
+
+                    val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+
+                    // 촬영한 사진이 저장될 파일 이름
+                    val fileName = "/temp_${System.currentTimeMillis()}.jpg"
+                    val picPath = "$filePath/$fileName"
+
+                    val file = File(picPath)
+
+                    contentUri = FileProvider.getUriForFile(
+                        requireContext(),
+                        "com.example.appgrouppurchasemaching.camera.file_provider", file
+                    )
+
+                    if (contentUri != null) {
+                        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, contentUri)
+                        startActivityForResult(cameraIntent, 1)
+                    }
+
+                    true
+                }
+                R.id.board_write_menu_gallery-> { //앨범 클릭 시
+                    val albumIntent =
+                        Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                    albumIntent.type= "image/*"
+
+                    val mimeType =arrayOf("image/*")
+                    albumIntent.putExtra(Intent.EXTRA_MIME_TYPES, mimeType)
+                    startActivityForResult(albumIntent, 2)
+                    true
+                }
+                R.id.board_write_menu_upload-> { //작성완료 클릭 시
+                    val act =activityas BoardMainActivity
+                    act.fragmentRemoveBackStack("board_write") //현재 프래그먼트는 제거하고
+                    act.fragmentController("board_read", true, true) //현재 글의 읽기 프래그먼트로 바로 전환
+                    true
+                }
+                else -> false
+            }
+}
+
+//스피너 어댑터 생성 - 액티비티 속 데이터 가져와서 스피너 목록 구성
+        val spinnerAdapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_spinner_dropdown_item,
+            act.boardNameList.drop(1)
+        )
+
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.boardWriteType.adapter= spinnerAdapter
+
+        //사용자가 선택한 게시글 목록에 따른 처리
+        if (act.selectedBoardType == 0) { //'전체' 게시판 선택 시
+            binding.boardWriteType.setSelection(0)
+        } else {
+            binding.boardWriteType.setSelection(act.selectedBoardType - 1)
+        }
+
+       return binding.root
+}
+
+    //재정의
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when (requestCode) {
+            1 -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    val bitmap = BitmapFactory.decodeFile(contentUri.path)
+                    binding.boardWriteImage.setImageBitmap(bitmap) //이미지뷰에 세팅
+
+                    val file = File(contentUri.path)
+                    file.delete()
+                }
+            }
+            2 -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    // 선택한 이미지에 접근할 수 있는 uri
+                    val uri = data?.data
+
+if (uri != null) {
+                        if (Build.VERSION.SDK_INT>= Build.VERSION_CODES.Q) {
+                            val source =
+                                ImageDecoder.createSource(activity?.contentResolver!!, uri)
+                            val bitmap = ImageDecoder.decodeBitmap(source)
+                            binding.boardWriteImage.setImageBitmap(bitmap) //이미지 뷰에 세팅
+                        } else {
+                            val cursor =
+activity?.contentResolver?.query(uri, null, null, null, null)
+                            if (cursor != null) {
+                                cursor.moveToNext()
+                                // 이미지 경로를 가져온다.
+                                val index = cursor.getColumnIndex(MediaStore.Images.Media.DATA)
+                                val source = cursor.getString(index)
+                                val bitmap = BitmapFactory.decodeFile(source)
+                                binding.boardWriteImage.setImageBitmap(bitmap)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+}
+```
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/4b530e00-4640-423f-a9aa-535dadfccde6/Untitled.png)
+
+---
+
+## 🟦 게시글 작성 시 유효성 검사
+
+### ▶️ 게시글 작성 유효성 검사
+
+- 글 작성 화면에서 사용자가 입력해야 하는 부분에 대한 유효성 검사를 실시한다.
+- ‘**입력하지 않고 업로드 시도하는 경우’에 대한 유효성 검사**
+
+---
+
+### **🟧 BoardWriteFragment.kt**
+
+- **Toolbar 속 upload 클릭 시 → 유효성 검사 코드 작성**
+- onCreateView() 속 툴바 메뉴 아이템 이벤트 리스터 내부의 **‘upload’ 메뉴 클릭 시 이벤트 처리.**
+- 1) 사용자가 뷰에 입력한 값들을 우선 받아둔 뒤
+- 2) 해당 값이 null or 길이 = 0 인 경우에 한해서 Dialog 알람을 띄우는 유효성 검사 실시한다.
+
+```kotlin
+R.id.board_write_menu_upload-> { //작성완료 클릭 시
+    val act =activityas BoardMainActivity
+
+    //뷰 바인딩으로 뷰 속에 사용자 입력한 내용 가져오기
+    //글 제목, 내용물 값 받아서
+    val boardWriteSubject = binding.boardWriteSubject.text.toString()
+    val boardWriteText = binding.boardWriteText.text.toString()
+    // 1) 글 제목 부분 작성 X -> 유효성 검사
+    if(boardWriteSubject == null || boardWriteSubject.length == 0 ){
+        val dialogBuilder = AlertDialog.Builder(requireContext())
+        dialogBuilder.setTitle("제목 입력 오류")
+        dialogBuilder.setMessage("제목을 입력해주세요. ")
+        dialogBuilder.setPositiveButton("확인"){dialogInterface: DialogInterface, i: Int->
+binding.boardWriteSubject.requestFocus() //글 제목 작성 칸 재포커싱
+}
+dialogBuilder.show()
+        return@setOnMenuItemClickListener true
+    }
+    // 2) 글 내용 부분 작성 X -> 유효성 검사
+    if(boardWriteText == null || boardWriteText.length == 0 ){
+        val dialogBuilder = AlertDialog.Builder(requireContext())
+        dialogBuilder.setTitle("내용 입력 오류")
+        dialogBuilder.setMessage("내용을 입력해주세요.")
+        dialogBuilder.setPositiveButton("확인"){dialogInterface: DialogInterface, i: Int->
+binding.boardWriteText.requestFocus() //글 제목 작성 칸 재포커싱
+}
+dialogBuilder.show()
+        return@setOnMenuItemClickListener true
+    }
+
+```
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/f5bff65a-0edc-4d59-b3a8-7433bf71c8a9/Untitled.png)
+
+---
+
+## 🟦 작성한 게시글 업로드 처리
+
+### ▶️ 사용자 작성 글 업로드 처리
+
+- 사용자가 작성한 글 내용을 **‘서버’에 업로드하는 작업 수행**
+
+---
+
+### **🟧 [DB] content_table 내용 설명**
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/c3afe421-ee92-47b4-82b8-4b100605ce77/Untitled.png)
+
+### **🟧 [서버] add_content.jsp**
+
+- 이곳에서 클라이언트가 작성한 **[글제목/내용/작성자/날짜/이미지] 데이터를 전달받아서 DB 상에 저장**시켜줄 것이다.
+
+```java
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ page import="java.sql.*"%>
+<%
+	//클라이언트가 전달하는 데이터 한글 깨지지 않도록 설정
+	request.setCharacterEncoding("utf-8");
+	
+	//클라이언트가 보낸 작성 게시글 관련 데이터 추출
+	String str1= request.getParameter("content_board_idx");
+	int content_board_idx = Integer.parseInt(str1); //형변환
+	
+	String str2 = request.getParameter("content_writer_idx");
+	int content_writer_idx = Integer.parseInt(str2); //형변환
+	
+	String content_subject = request.getParameter("content_subject");
+	String content_text = request.getParameter("content_text");
+
+	//DB 접속 정보 세팅
+	String dbUrl = "jdbc:mysql://localhost:3306/groupapp_db";
+	String dbId = "root";
+	String dbPw = "1234";
+	
+	//드라이버 로딩
+	Class.forName("com.mysql.cj.jdbc.Driver");
+	
+	//DB 실질적 접속
+	Connection conn = DriverManager.getConnection(dbUrl, dbId, dbPw);
+	
+	//쿼리문 작성 - 게시글목록/작성자idx/글제목/글내용
+	String sql = "insert into content_table "
+				+ "(content_board_idx, content_writer_idx, content_subject, content_text) values (?, ?, ?, ?)";
+	
+	//쿼리 실행 
+	PreparedStatement pstmt = conn.prepareStatement(sql);
+	
+	pstmt.setInt(1, content_board_idx);
+	pstmt.setInt(2, content_writer_idx);
+	pstmt.setString(3, content_subject);
+	pstmt.setString(4, content_text);
+	
+	pstmt.execute();//실행 
+	
+	conn.close();//접속 끊기 
+	
+%>
+```
+
+### **🟧 [클라이언트] BoardWriteFragment.kt**
+
+- 1) 사용자가 앱 화면 view(글 작성 화면) 에 작성한 글 제목/내용/작성자idx/게시글목록idx 데이터를 서버에 보내고 DB 에 최종 저장시킨다.
+- 2) 사용자의 작성 글 관련 데이터가 서버에 성공적으로 저장될 경우 → 키보드 내려가고 작성 완료 알림을 띄운다.
+
+```kotlin
+//툴바 속 메뉴 세팅
+binding.boardWriteToolbar.inflateMenu(R.menu.board_write_menu)
+binding.boardWriteToolbar.setOnMenuItemClickListener{
+when (it.itemId) {
+        R.id.board_write_menu_camera-> { //카메라 클릭 시
+	           . . . 
+        }
+        R.id.board_write_menu_gallery-> { //앨범 클릭 시
+            . . .
+        }
+        R.id.board_write_menu_upload-> { //작성완료 클릭 시
+            val act =activityas BoardMainActivity
+
+            //뷰 바인딩으로 뷰 속에 사용자 입력한 내용 가져오기
+            //글 제목, 내용 데이터
+            val boardWriteSubject = binding.boardWriteSubject.text.toString()
+            val boardWriteText = binding.boardWriteText.text.toString()
+            //액티비티 단위로 호환되는 게시글 목록 idx 가져옴
+            val boardWriteType = act.boardIndexList[binding.boardWriteType.selectedItemPosition+ 1]
+            //앱 단위로 호환되는 Preferences에 저장된 로그인 idx 가져옴
+            val pref = requireContext().getSharedPreferences("login_data", Context.MODE_PRIVATE)
+            val boardWriterIdx = pref.getInt("login_user_idx", 0)
+						
+						// ... 유효성 검사 코드 (생략) 
+
+      
+  **//-> [서버 통신 작업 처리]**
+thread{
+val client = OkHttpClient()
+
+                val site = "http://${ServerInfo.SERVER_IP}:8080/App_GroupCharge_Server/add_content.jsp"
+
+                //보낼 데이터 세팅
+                val builder1 = FormBody.Builder()
+                builder1.add("content_board_idx", "$boardWriteType")
+                builder1.add("content_writer_idx", "$boardWriterIdx")
+                builder1.add("content_subject", boardWriteSubject)
+                builder1.add("content_text", boardWriteText)
+                val formBody = builder1.build() //생성
+
+                //요청Request
+                val request = Request.Builder().url(site).post(formBody).build()
+                //요청 반환값은 response 변수로 받음
+                val response = client.newCall(request).execute()
+
+                if(response.isSuccessful == true){ //서버 통신 성공 시,
+                    //화면 관련 작업은 runOnUiThread 처리
+activity?.runOnUiThread{
+//키보드 숨김 설정 - 글 작성 중이던 키보드 숨기기 처리
+                        val inputMethodManager = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                        inputMethodManager.hideSoftInputFromWindow(binding.boardWriteSubject.windowToken, 0)
+                        inputMethodManager.hideSoftInputFromWindow(binding.boardWriteText.windowToken, 0)
+
+                        //알림
+                        val dialogBuilder = AlertDialog.Builder(requireContext())
+                        dialogBuilder.setTitle("작성 완료")
+                        dialogBuilder.setMessage("작성이 완료되었습니다.")
+                        dialogBuilder.setPositiveButton("확인"){dialogInterface: DialogInterface, i: Int->
+//화면 전환 처리
+                            act.fragmentRemoveBackStack("board_write") //현재 프래그먼트는 제거하고
+                            act.fragmentController("board_read", true, true) //현재 글의 읽기 프래그먼트로 바로 전환
+}
+dialogBuilder.show()
+}
+} else { //서버 통신 실패 시
+activity?.runOnUiThread{
+val dialogBuilder = AlertDialog.Builder(requireContext())
+                        dialogBuilder.setTitle("작성 오류")
+                        dialogBuilder.setMessage("작성 오류가 발생하였습니다.")
+                        dialogBuilder.setPositiveButton("확인", null)
+                        dialogBuilder.show()
+		}
+	}
+}
+true
+        }
+        else -> false
+    }
+}
+```
+
+### **📍[추가] 키보드 보이기 OR 숨기기 설정**
+
+**inputMethodManager 클래스 제공 메소드** 
+
+   1) **showSoftInput(view, flags) :** 키보드 보이게 설정
+
+   2) **hideSoftInputFromWindow() :** 키보드 숨기기 설정
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/55f5070c-5737-4595-9cf6-fc5fb3a05194/Untitled.png)
+
+---
+
+## 🟦 서버에 ‘첨부한 이미지’ 보내기
+
+### ▶️ 서버에 ‘사용자가 선택한 이미지’ 저장하기
+
+- **사용자가 선택한 ‘이미지 파일’을 서버로 전송하여 서버에 저장**한다.
+- 이미지 뿐 아니라 **다양한 형태의 ‘파일 데이터’를 서버로 전달하는 방법**인 셈이다.
+
+### 📌 COS 라이브러리 사용
+
+- **1) [서버]에서 코드 구현 시, java 기반 웹 개발의 ‘파일 업로드 처리’를 위해서 널리 사용되어지는 [cos 라이브러리]를 사용한다.**
+- **2) Okhttp3를 통해 서버로 파일 데이터 전달 시에는 ‘파일 경로를 지정’해주어야 한다.**
+- **[이미지 파일을 임시 저장] 후 → [서버에 데이터를 전달] 의 순서로 작업을 진행한다.**
+
+---
+
+### **🟧 [서버]**
+
+**1) cos 라이브러리.jar 파일을 WEB-INF/lib 하위 폴더에 담는다.**
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/d8b21420-a8c0-4d95-8d27-b4ef50e14982/Untitled.png)
+
+**2) cos = com.oreilly.servlet의 약자**
+
+- 따라서 COS 라이브러리를 사용하기 위한 import 필요
+
+```java
+<%@ page import = "com.oreilly.servlet.*" %>
+<%@ page import = "com.oreilly.servlet.multipart.*" %>
+```
+
+**3) 파일 업로드 처리 작업**
+
+- MultipartRequest객체를 이용한 파일 업로드 방법
+
+```java
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ page import="java.sql.*"%>
+<%@ page import = "com.oreilly.servlet.*" %>
+<%@ page import = "com.oreilly.servlet.multipart.*" %>
+<%
+	//클라이언트가 전달하는 데이터 한글 깨지지 않도록 설정
+	request.setCharacterEncoding("utf-8");
+	
+	//실제 이미지 업로드할 upload 폴더의 경로 구하기 
+	String uploadPath = application.getRealPath("upload");
+	//System.out.println(uploadPath);
+	
+	//파일 업로드 처리 
+	DefaultFileRenamePolicy policy = new DefaultFileRenamePolicy(); //중복된 파일이름 변경 정책 객체
+	MultipartRequest multi = new MultipartRequest(request, uploadPath, 100*1024*1024, "utf-8", policy);
+
+	//클라이언트가 보낸 작성 게시글 관련 데이터 추출 [request -> multi 변경 ]
+	String str1= multi.getParameter("content_board_idx");
+	int content_board_idx = Integer.parseInt(str1); //형변환
+	
+	String str2 = multi.getParameter("content_writer_idx");
+	int content_writer_idx = Integer.parseInt(str2); //형변환
+	
+	String content_subject = multi.getParameter("content_subject");
+	String content_text = multi.getParameter("content_text");
+	
+	//이미지 데이터 
+	String content_image = multi.getFilesystemName("content_image"); 
+	
+	//DB 접속 정보 세팅
+	String dbUrl = "jdbc:mysql://localhost:3306/groupapp_db";
+	String dbId = "root";
+	String dbPw = "1234";
+	
+	//드라이버 로딩
+	Class.forName("com.mysql.cj.jdbc.Driver");
+	
+	//DB 실질적 접속
+	Connection conn = DriverManager.getConnection(dbUrl, dbId, dbPw);
+	
+	//쿼리문 작성 - 게시글목록/작성자idx/글제목/글내용
+	String sql = "insert into content_table "
+				+ "(content_board_idx, content_writer_idx, content_subject, content_text, content_image) values (?, ?, ?, ?, ?)";
+	
+	//쿼리 실행 
+	PreparedStatement pstmt = conn.prepareStatement(sql);
+	
+	pstmt.setInt(1, content_board_idx);
+	pstmt.setInt(2, content_writer_idx);
+	pstmt.setString(3, content_subject);
+	pstmt.setString(4, content_text);
+	pstmt.setString(5, content_image);
+	
+	pstmt.execute();//실행 
+	
+	conn.close();//접속 끊기 
+	
+%>
+```
+
+### **📌 [추가] webapp 폴더의 하위에 upload 폴더를 생성**
+
+→ 이 폴더의 실제 Path를 알아야 이미지 업로드 시 경로를 제대로 줄 수 있다.
+
+```kotlin
+//실제 이미지 업로드할 upload 폴더의 경로 구하기 
+	String uploadPath = application.getRealPath("upload");
+	System.out.println(uploadPath);
+```
+
+![경로확인.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/5eebf1e2-6a6a-410e-bdc7-e35c96a2730e/%EA%B2%BD%EB%A1%9C%ED%99%95%EC%9D%B8.png)
+
+### **🟧 [클라이언트] BoardWriteFragment.kt**
+
+- 1) 이전까지는 **‘문자열’데이터를 보내기 위해 서버로 보낼 데이터 세팅 시 FormBody 를 사용**했다.
+- 2) **서버로 보낼 데이터 세팅에, 파일 데이터를 포함할 경우에는 MultipartBody 를 사용**해야 한다.
+- **3) 사용자가 선택한 이미지 파일이 존재할 경우,**
+    - 파일 경로 잡아주고 서버에 보낼 데이터에 최종 포함시켜준다.
+
+```kotlin
+            //-> 서버 통신 작업 처리
+thread{
+val client = OkHttpClient()
+
+                val site = "http://${ServerInfo.SERVER_IP}:8080/App_GroupCharge_Server/add_content.jsp"
+
+                //보낼 데이터 세팅 -FormBody = '문자열' 데이터 세팅
+                // cf. MultipartBody = 파일 데이터까지 포함한한세팅
+                val builder1 = MultipartBody.Builder()
+                builder1.setType(MultipartBody.FORM) //타입 세팅 필요
+                builder1.addFormDataPart("content_board_idx", "$boardWriteType")
+                builder1.addFormDataPart("content_writer_idx", "$boardWriterIdx")
+                builder1.addFormDataPart("content_subject", boardWriteSubject)
+                builder1.addFormDataPart("content_text", boardWriteText)
+
+                var file : File? = null
+                //사용자가 선택한 이미지 파일 존재하는 경우에 한해서
+                if(uploadImage != null) {
+                    val filePath = requireContext().getExternalFilesDir(null).toString()
+                    val fileName = "/temp_${System.currentTimeMillis()}.jpg"
+                    val picPath = "$filePath/$fileName"
+                    file = File(picPath)
+                    val fos = FileOutputStream(file)
+                    uploadImage?.compress(Bitmap.CompressFormat.JPEG, 100, fos)
+                    //파일 읽어서 '서버로 보낼 데이터'에 포함 시켜준다.
+                    builder1.addFormDataPart("content_image", file.name, file.asRequestBody(MultipartBody.FORM))
+                }
+
+                val formBody = builder1.build() //생성
+
+                //요청Request
+                val request = Request.Builder().url(site).post(formBody).build()
+                //요청 반환값은 response 변수로 받음
+                val response = client.newCall(request).execute()
+
+                if(response.isSuccessful == true){ //서버 통신 성공 시,
+                    //화면 관련 작업은 runOnUiThread 처리
+activity?.runOnUiThread{
+//키보드 숨김 설정 - 글 작성 중이던 키보드 숨기기 처리
+                        val inputMethodManager = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                        inputMethodManager.hideSoftInputFromWindow(binding.boardWriteSubject.windowToken, 0)
+                        inputMethodManager.hideSoftInputFromWindow(binding.boardWriteText.windowToken, 0)
+
+                        //알림
+                        val dialogBuilder = AlertDialog.Builder(requireContext())
+                        dialogBuilder.setTitle("작성 완료")
+                        dialogBuilder.setMessage("작성이 완료되었습니다.")
+                        dialogBuilder.setPositiveButton("확인"){dialogInterface: DialogInterface, i: Int->
+//화면 전환 처리
+                            act.fragmentRemoveBackStack("board_write") //현재 프래그먼트는 제거하고
+                            act.fragmentController("board_read", true, true) //현재 글의 읽기 프래그먼트로 바로 전환
+}
+dialogBuilder.show()
+}
+} else { //서버 통신 실패 시
+activity?.runOnUiThread{
+val dialogBuilder = AlertDialog.Builder(requireContext())
+                        dialogBuilder.setTitle("작성 오류")
+                        dialogBuilder.setMessage("작성 오류가 발생하였습니다.")
+                        dialogBuilder.setPositiveButton("확인", null)
+                        dialogBuilder.show()
+}
+}
+}
+true
+        }
+        else -> false
+    }
+}
+```
+
+### **🟧 최종 모습**
