@@ -2199,3 +2199,7 @@ true
 ```
 
 ### **🟧 최종 모습**
+
+<img width="685" alt="업로드 최종" src="https://user-images.githubusercontent.com/39732720/185343216-1d6ae5c8-659f-48e8-a5d1-1a4c48c023ef.png">
+
+
