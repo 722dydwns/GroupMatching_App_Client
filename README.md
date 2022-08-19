@@ -2913,3 +2913,7 @@ return binding.root
 
 ### **🟧 최종 모습**
 
+<img width="719" alt="메뉴 컨트롤 최종" src="https://user-images.githubusercontent.com/39732720/185574562-95ca491c-1cc5-44df-ae3f-15ca45f995f1.png">
+---
+
+
