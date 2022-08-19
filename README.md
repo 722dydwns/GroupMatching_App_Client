@@ -2202,4 +2202,714 @@ true
 
 <img width="685" alt="업로드 최종" src="https://user-images.githubusercontent.com/39732720/185343216-1d6ae5c8-659f-48e8-a5d1-1a4c48c023ef.png">
 
+## 🟦 게시글 읽는 화면 구현하기
+
+### ▶️ 게시글 읽기 화면 구현
+
+- 글 작성 시 작성된 글을 보여줄 때 띄워지는 ‘게시글 읽기 화면’
+- **작성한 글의 idx 번호를 가져와서, 해당 인덱스 번호 정보를 토대로 작성 글을 띄울 수 있도록 처리함**
+- **첨부한 이미지가 있는 경우 → 이미지 데이터도 함께 세팅**해줌
+
+---
+
+🙋🏻‍♀️ 최근 작성한 content_idx값을 추출해서 서버가 응답 결과로 주고, 클라이언트가 그 결과를 받아두는 작업 처리
+
+### **🟧 [서버] add_content.jsp**
+
+- **1) DB에 가서 사용자의 ‘현재’ 게시글 목록 idx 값을 기준으로 가장 큰 content_idx값 갖는 (즉, 최신의 글)인 애를 read_content_idx 값으로 SELECT 처리**
+- **2) DB에서 SELECT한 값 = read_content_idx 값을 다시 클라이언트에게 응답 결과로 보내준다.**
+
+```java
+  //현재 작성한 게시글 idx 값을 응답 결과로 보내준다.
+	//현재의 게시글 목록 idx 중에서 가장 content_idx 가 큰 애를 가져옴 (최근 작성 순)
+	String sql2 = "select max(content_idx) as read_content_idx from content_table where content_board_idx = ?";
+	
+	PreparedStatement pstmt2 = conn.prepareStatement(sql2);
+	pstmt2.setInt(1, content_board_idx);
+	
+	ResultSet rs = pstmt2.executeQuery();
+	rs.next();
+	
+	int read_content_idx = rs.getInt("read_content_idx");
+```
+
+### **🟧 [클라이언트] BoardMainActivity.kt**
+
+- 여기에 현재 사용자가 읽고 있는 게시글(내용) idx값 데이터를 갖고 있는다.
+
+```kotlin
+//현재 읽고있는 게시글의 idx값
+var readContentIdx = 0
+```
+
+### **🟧 [클라이언트] BoardWriteFragment.kt**
+
+- **1) 서버에서 보내온 read_content_idx 값을 응답 결과로 받은 뒤, BoardMainActivity에 세팅해놓았던 readContentIdx 변수에 할당**한다.
+- **2) thread{ } 로 서버와 통신 작업을 처리.**
+    - 서버가 보낸 응답 결과는 read_content_idx 값이므로 이 값을 다시 BoardMainActivity의 변수인 readContentIdx 변수에 세팅해줌
+    - → 이유: BoardReadFragment에서 최근 작성한 글의 idx 값을 사용해야 하기 때문이다.
+    
+    **3) 작성 완료 알림 띄운 뒤 → BoardReadFragment로 화면 전환 처리**됨
+    
+
+```kotlin
+
+//-> 서버 통신 작업 처리
+thread{
+val client = OkHttpClient()
+
+                val site = "http://${ServerInfo.SERVER_IP}:8080/App_GroupCharge_Server/add_content.jsp"
+
+                //보낼 데이터 세팅 -FormBody = '문자열' 데이터 세팅
+                // cf. MultipartBody = 파일 데이터까지 포함한한세팅
+                val builder1 = MultipartBody.Builder()
+                builder1.setType(MultipartBody.FORM) //타입 세팅 필요
+                builder1.addFormDataPart("content_board_idx", "$boardWriteType")
+                builder1.addFormDataPart("content_writer_idx", "$boardWriterIdx")
+                builder1.addFormDataPart("content_subject", boardWriteSubject)
+                builder1.addFormDataPart("content_text", boardWriteText)
+
+                var file : File? = null
+                //사용자가 선택한 이미지 파일 존재하는 경우에 한해서
+                if(uploadImage != null) {
+                    val filePath = requireContext().getExternalFilesDir(null).toString()
+                    val fileName = "/temp_${System.currentTimeMillis()}.jpg"
+                    val picPath = "$filePath/$fileName"
+                    file = File(picPath)
+                    val fos = FileOutputStream(file)
+                    uploadImage?.compress(Bitmap.CompressFormat.JPEG, 100, fos)
+                    //파일 읽어서 '서버로 보낼 데이터'에 포함 시켜준다.
+                    builder1.addFormDataPart("content_image", file.name, file.asRequestBody(MultipartBody.FORM))
+                }
+
+                val formBody = builder1.build() //생성
+
+                //요청Request
+                val request = Request.Builder().url(site).post(formBody).build()
+                //요청 반환값은 response 변수로 받음
+                val response = client.newCall(request).execute()
+
+                if(response.isSuccessful == true){ //서버 통신 성공 시,
+                    //서버가 보내온 응답 결과 받음 = read_content_idx값
+                    val resultText = response.body?.string()!!.trim()
+                    act.readContentIdx = Integer.parseInt(resultText)
+                    Log.d("test", "${act.readContentIdx}")
+
+                    //화면 관련 작업은 runOnUiThread 처리
+activity?.runOnUiThread{
+//키보드 숨김 설정 - 글 작성 중이던 키보드 숨기기 처리
+                        val inputMethodManager = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                        inputMethodManager.hideSoftInputFromWindow(binding.boardWriteSubject.windowToken, 0)
+                        inputMethodManager.hideSoftInputFromWindow(binding.boardWriteText.windowToken, 0)
+
+                        //알림
+                        val dialogBuilder = AlertDialog.Builder(requireContext())
+                        dialogBuilder.setTitle("작성 완료")
+                        dialogBuilder.setMessage("작성이 완료되었습니다.")
+                        dialogBuilder.setPositiveButton("확인"){dialogInterface: DialogInterface, i: Int->
+//화면 전환 처리
+                            act.fragmentRemoveBackStack("board_write") //현재 프래그먼트는 제거하고
+                            act.fragmentController("board_read", true, true) //현재 글의 읽기 프래그먼트로 바로 전환
+}
+dialogBuilder.show()
+}
+} else { //서버 통신 실패 시
+activity?.runOnUiThread{
+val dialogBuilder = AlertDialog.Builder(requireContext())
+                        dialogBuilder.setTitle("작성 오류")
+                        dialogBuilder.setMessage("작성 오류가 발생하였습니다.")
+                        dialogBuilder.setPositiveButton("확인", null)
+                        dialogBuilder.show()
+}
+}
+}
+true
+        }
+        else -> false
+    }
+}
+
+```
+
+---
+
+🙋🏻‍♀️ **이제 ‘게시글 읽기 화면’을 제대로 세팅.**
+
+- ‘게시글 작성’ 시 회원이 작성한 데이터를 DB 상에 저장해놓았다.
+- ‘게시글 읽기’ 화면 속에 올라갈 데이터는 저장되어있는 content_table 속 데이터들이다.
+- 서버에서 해당 데이터를 JSON 형태의 응답 결과로 클라이언트에게 보내주면, 클라이언트는 해당 응답결과를 뷰에 세팅해주는 작업을 하면 되는 것이다.
+
+### **🟧 [서버] get_content.jsp**
+
+- 1) 우선 read_content_idx 값을 받으면, 이 idx값에 일치하는 게시글 내용물 데이터를 content_table에서 SELECT하여 다시 응답결과로 클라이언트에게 보내줄 예정
+- 이때, DB 상에 존재하는 데이터를 JSON 형태로 클라이언트에게 보내줄 것이다.
+
+```java
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ page import="java.sql.*"%>
+<%@ page import="org.json.simple.*" %>
+<%
+	//이 곳에서 DB 상에 저장해놨던 Content 테이블 데이터를 다시 응답결과로 클라이언트에게 보내주는 작업할 것
+	
+	request.setCharacterEncoding("utf-8");
+	
+	//1) 우선 클라이언트가 보낸 요청에서 read_content_idx값을 추출
+	String str1 = request.getParameter("read_content_idx");
+	int readContentIdx = Integer.parseInt(str1);
+	
+	//DB 접속 정보 세팅
+	String dbUrl = "jdbc:mysql://localhost:3306/groupapp_db";
+	String dbId = "root";
+	String dbPw = "1234";
+	
+	//드라이버 로딩
+	Class.forName("com.mysql.cj.jdbc.Driver");
+	
+	//DB 실질적 접속
+	Connection conn = DriverManager.getConnection(dbUrl, dbId, dbPw);
+	
+	//sql 문 작성
+	String sql = "select a1.content_subject, a2.user_nick_name as content_nick_name, "
+			+ "date_format(a1.content_write_date, '%Y-%m-%d') as content_write_date, a1.content_text, a1.content_image "
+			+ "from content_table a1, user_table a2 "
+			+ "where a1.content_writer_idx = a2.user_idx "
+			+ "and content_idx = ?;";
+			
+	//sql 실행
+	PreparedStatement pstmt = conn.prepareStatement(sql);
+	pstmt.setInt(1, readContentIdx);
+	
+	//응답 보낼 데이터 세팅
+	ResultSet rs = pstmt.executeQuery();
+	rs.next();
+	
+	//여기서 select 정보는 1행이므로 JSON Object 객체에 담을 예정
+	JSONObject obj = new JSONObject();
+	
+	//DB 상에서 추출한 데이터 임시로 뽑아온 뒤 
+	String contentSubject = rs.getString("content_subject");
+	String contentNickName = rs.getString("content_nick_name");
+	String contentWriteDate = rs.getString("content_write_date");
+	String contentText = rs.getString("content_text");
+	String contentImage = rs.getString("content_image");
+	
+	//json object객체에 다시 세팅 
+	obj.put("content_subject", contentSubject);
+	obj.put("content_nick_name", contentNickName);
+	obj.put("content_write_date", contentWriteDate);
+	obj.put("content_text", contentText);
+	obj.put("content_image", contentImage);
+	
+	//접속 종료
+	conn.close();
+%>
+<%= obj.toJSONString() %>
+```
+
+### **🟧 [DB] 가져올 데이터 SELECT 처리 시, join 작업 수행**
+
+- 1) content_table 속 데이터에는 user_idx값은 있지만 닉네임 이름값이 없다.
+- 2) content_table 과 user_table에서 idx값이 일치하는 user_nick_name을 SELECT 처리하기 위해 JOIN 작업을 수행한다.
+- 3) 날짜 데이터는 date_format()으로 형식을 맞춰서 가져온다.
+
+```sql
+select a1.content_subject, a2.user_nick_name as content_nick_name, 
+date_format(a1.content_write_date, '%Y-%m-%d') as content_write_date, a1.content_text, a1.content_image
+from content_table a1, user_table a2
+where a1.content_writer_idx = a2.user_idx
+and content_idx = 1;
+```
+
+![DB .png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/f48e4fe3-001f-43df-84f5-1315eaa57359/DB_.png)
+
+### **🟧 [클라이언트] BoardReadFragment.kt**
+
+- 1) 서버로부터 ‘게시글 읽기 화면’ 구성할 데이터를 받아서 세팅해주어야 한다.
+- 2) 우선 서버에게 최근 작성한 글 목록인 read_content_idx 값을 formBody 형태로 보내서 Request 요청을 한다.
+- 3) 서버가 DB 상에 해당 idx값을 갖는 content 내용물 데이터를 다시 응답결과로 준다.
+- 4) 응답 결과를 다시 뷰 바인딩으로 화면 세팅해준다
+- 5) 이때, 이미지 뷰의 경우, 받은 이미지 이름값이 존재하는 경우에 한해 다시 네트워크와 통신해서 해당 url 값에 접속하여 이미지 얻어오고, bitmap으로 이미지 객체 생성하여 → 최종 게시글 읽기 화면 속 이미지 뷰에 세팅해주는 방식으로 세팅
+
+```kotlin
+//서버로부터 글 내용 데이터 받기
+thread{
+val client = OkHttpClient()
+  val site = "http://${ServerInfo.SERVER_IP}:8080/App_GroupCharge_Server/get_content.jsp"
+
+    //서버로 보낼 데이터 : 최근 작성 글 목록 idx값 <- 액티비티 딴에 저장해놨떤 값 받기
+    val act =activityas BoardMainActivity
+    //데이터 세팅
+    val builder1 = FormBody.Builder()
+    builder1.add("read_content_idx", "${act.readContentIdx}")
+    val formBody = builder1.build()
+    //Request로 요청 보내고 (데이터보내서)
+    val request = Request.Builder().url(site).post(formBody).build()
+    //요청에 대한 응답은 response로 받고
+    val response = client.newCall(request).execute()
+
+    if(response.isSuccessful == true) { //서버 통신 성공 시
+        val resultText = response.body?.string()!!.trim()
+        val obj = JSONObject(resultText)
+
+        //게시글 읽기 화면의 뷰 세팅해준다- 받은 데이터들로
+activity?.runOnUiThread{
+binding.boardReadSubject.text= obj.getString("content_subject")
+            binding.boardReadWriter.text= obj.getString("content_nick_name")
+            binding.boardReadWriteDate.text= obj.getString("content_write_date")
+            binding.boardReadText.text= obj.getString("content_text")
+
+            //이미지 파일명 받음
+            val contentImage = obj.getString("content_image")
+            if(contentImage == "null") { //얻어온 이미지 없다면
+                binding.boardReadImage.visibility= View.GONE//화면 상에도 이미지뷰 안보이도록 처리
+            }else { //이미지 있다면 네트워크 통신 처리
+thread{
+val imageUrl = URL("http://${ServerInfo.SERVER_IP}:8080/App_GroupCharge_Server/upload/${contentImage}")
+                    //접속한 url에서 이미지 얻어온 뒤, 이미지 객체 bitmap으로 생성하기
+                    val bitmap = BitmapFactory.decodeStream(imageUrl.openConnection().getInputStream())
+activity?.runOnUiThread{
+binding.boardReadImage.setImageBitmap(bitmap) //생성한 이미지 객체를 뷰에 세팅
+}
+
+                }
+}
+}
+
+}
+}
+
+```
+
+![최종 읽기.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/f2fd77e2-91e1-48f7-9f58-0a3d177d1265/%EC%B5%9C%EC%A2%85_%EC%9D%BD%EA%B8%B0.png)
+
+---
+
+## 🟦 글 목록 데이터 가져오기
+
+### ▶️ 게시글 목록 데이터를 가져오기
+
+- 작성한 글의 목록을 가져오도록 한다 .
+- ‘전체 게시판’이 선택된 경우 모든 글을 가져온다.
+- ‘특정 게시판’이 선택된 경우 해당 게시판 목록 idx값 기준으로 해당 게시판 목록의 글들만 가져오도록 처리한다.
+
+---
+
+![중간 글목록 결과.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/ab220ac0-d53c-40da-aa83-186d217804a5/%EC%A4%91%EA%B0%84_%EA%B8%80%EB%AA%A9%EB%A1%9D_%EA%B2%B0%EA%B3%BC.png)
+
+### **🟧 [DB] 상에서 작업할 쿼리문**
+
+- **게시글 목록 화면에서 각 글 목록 데이터의 구성은 [작성자/날짜/글제목/idx] 값**
+- → 다만 작성자의 경우 JOIN(조인)이 필요하다.
+- → 마지막으로 최신 등록 순으로 목록 화면에 올라와야 하므로 **역순 정렬** 해준다.
+
+```sql
+select a1.content_subject, a2.user_nick_name as content_nick_name, 
+date_format(a1.content_write_date, '%Y-%m-%d') as content_write_date, a1.content_idx
+from content_table a1, user_table a2
+where a1.content_writer_idx = a2.user_idx
+	and a1.content_board_idx = 1
+order by a1.content_idx desc;
+```
+
+### **🟧 [서버] get_content_list.jsp**
+
+- 클라이언트가 보낸 ‘게시글 목록 idx’값을 기준으로 게시글 목록 화면을 구성해야 할 데이터 목록을 SELECT 처리한 뒤 ResultSet으로 최종 응답 결과를 JSON 형태로 보낸다.
+
+```sql
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ page import = "java.sql.*" %>
+<%@ page import = "org.json.simple.*" %>
+<%
+	//클라이언트가 전달하는 데이터 한글 깨지지 않도록 설정
+	request.setCharacterEncoding("utf-8");
+	
+	//클라이언트가 전달한 데이터 - 게시판 목록 idx 값 추출
+	String str1 = request.getParameter("content_board_idx");
+	int content_board_idx = Integer.parseInt(str1);
+	
+	//DB 접속 정보 세팅
+	String dbUrl = "jdbc:mysql://localhost:3306/groupapp_db";
+	String dbId = "root";
+	String dbPw = "1234";
+	
+	//드라이버 로딩
+	Class.forName("com.mysql.cj.jdbc.Driver");
+	
+	//DB 실질적 접속
+	Connection conn = DriverManager.getConnection(dbUrl, dbId, dbPw);
+	
+	//sql 문 작성
+	String sql = "select a1.content_subject, a2.user_nick_name as content_nick_name, "
+				+ "date_format(a1.content_write_date, '%Y-%m-%d') as content_write_date, a1.content_idx "
+				+ "from content_table a1, user_table a2 "
+				+ "where a1.content_writer_idx = a2.user_idx ";
+	
+	//'전체 게시판 목록을 선택한 경우 위 sql문에서 끝나고
+	
+	//특정 게시판 목록을 선택한 경우라면
+	if(content_board_idx != 0){ 
+		sql += "and a1.content_board_idx = ? "; //sql문 추가 
+	}
+	sql += "order by a1.content_idx desc;";
+	
+	//sql 실행
+	PreparedStatement pstmt = conn.prepareStatement(sql);
+	
+	if(content_board_idx != 0) {
+		pstmt.setInt(1, content_board_idx);
+	}
+	//응답 결과 세팅
+	ResultSet rs = pstmt.executeQuery();
+	
+	JSONArray root = new JSONArray();
+	
+	while(rs.next()) {
+		int contentIdx = rs.getInt("content_idx");
+		String contentNickName = rs.getString("content_nick_name");
+		String contentWriteDate = rs.getString("content_write_date");
+		String contentSubject = rs.getString("content_subject");
+		
+		JSONObject obj = new JSONObject();
+		obj.put("content_idx", contentIdx);
+		obj.put("content_nick_name", contentNickName);
+		obj.put("content_write_date", contentWriteDate);
+		obj.put("Content_subject", contentSubject);
+		
+		root.add(obj); //JSON 배엵객체에 최종 add 처리 
+	}
+	
+	conn.close(); //접속 종료 
+%>
+<%= root.toJSONString() %>
+```
+
+### **🟧 [클라이언트] BoardMainFragment.kt**
+
+- 1) ‘게시글 목록 화면’에서 서버로 현재 ‘게시글 목록 idx’값을 함께 보낸 뒤 Request 요청한다.
+- 2) 서버가 보내준 응 답 결과 데이터를 토대로 각 게시글 목록 뷰를 세팅한다.
+- **→ [데이터 담을 변수 ArrayList 타입으로 선언]**
+
+```kotlin
+//Array 리스트 4개-글 목록 구성할 데이터 리스트
+val contentIdxList = ArrayList<Int>()
+val contentWriterList = ArrayList<String>()
+val contentWriteDateList = ArrayList<String>()
+val contentSubjectList = ArrayList<String>()
+```
+
+- **각 항목 하나 구성 데이터를 ‘ViewHlder’클래스에서 바인딩 처리하고, 각 항목 터치 시 자동 호출되는 onCLick() 메소드 내부에서 현재 사용자가 ‘읽기’ 선택한 내용물 idx 값을 재새팅 한다.**
+- 또한 **getContentList(clear: boolean) 메소드를 선언**하여
+    - **1) clear= T** 들어오면 이전 데이터 초기화
+    - **2) clear = F** 들어오면 서버와 통신하여 현재 필요한 게시글 목록 상의 데이터들을 가져와서 ArrayList 로컬 변수 4개에 세팅처리 → 이후 Recycler 뷰 어댑터에게 데이터 재세팅을 요청한다.
+
+**◾ 전체 코드**
+
+```kotlin
+package com.example.appgrouppurchasemaching.board
+
+import android.content.DialogInterface
+import android.os.Bundle
+import androidx.fragment.app.Fragment
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.appgrouppurchasemaching.R
+import com.example.appgrouppurchasemaching.ServerInfo
+import com.example.appgrouppurchasemaching.databinding.BoardMainRecyclerItemBinding
+import com.example.appgrouppurchasemaching.databinding.FragmentBoardMainBinding
+import com.example.appgrouppurchasemaching.intro.MainActivity
+import okhttp3.FormBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import org.json.JSONArray
+import kotlin.concurrent.thread
+
+class BoardMainFragment : Fragment() { //게시판 목록 메인 프래그먼트
+    //바인딩 설정
+    lateinit var binding : FragmentBoardMainBinding
+
+    //Array 리스트 4개-글 목록 구성할 데이터 리스트
+    val contentIdxList = ArrayList<Int>()
+    val contentWriterList = ArrayList<String>()
+    val contentWriteDateList = ArrayList<String>()
+    val contentSubjectList = ArrayList<String>()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        // Inflate the layout for this fragment
+        val act =activityas BoardMainActivity
+
+        //바인딩
+        binding = FragmentBoardMainBinding.inflate(inflater)
+        binding.boardMainToolbar.title= act.boardNameList[act.selectedBoardType]
+                                    //-> 사용자 선택한 게시글 목록 idx 값에 따르 이름값을 title로 세팅하기
+        //게시판 항목 메뉴 추가하기
+        binding.boardMainToolbar.inflateMenu(R.menu.board_main_menu)
+        // 이 항목 메뉴 item 클릭 이벤트 처리
+        binding.boardMainToolbar.setOnMenuItemClickListener{
+//툴바 속 존재하는 메뉴item 클릭 시. 이벤트 처리
+            when(it.itemId){
+                R.id.board_main_menu_board_list-> {  //다이얼로그로 게시판 목록을 띄운다.
+                    //액티비티에서 받아놨던 데이터 받기 위해 act
+                    val act =activityas BoardMainActivity
+                    //단 여기서 toTypedArray()로 변경해주어야 한다. Array 객체로 변경
+                    val boardListBuilder = AlertDialog.Builder(requireContext())
+                    boardListBuilder.setTitle("게시판 목록")
+                    boardListBuilder.setNegativeButton("취소", null)
+
+                    //여기서 게시판 목록 '클릭'하는 경우 이벤트 처리
+                    boardListBuilder.setItems(act.boardNameList.toTypedArray()){dialogInterface: DialogInterface, i: Int->
+act.selectedBoardType = i //사용자 선택한 i에 따라
+                        //각 목록에 대한 데이터 처리를 위해서 이전 데이터 clear 처리 -> 각 게시판 목록 idx 값에 따른 데이터를 세팅
+                        getContentList(true)
+
+                        binding.boardMainToolbar.title= act.boardNameList[act.selectedBoardType]
+}
+boardListBuilder.show()
+                    true //메뉴 클릭 시 무언가 작업했으므로 T 반환시킴
+                }
+                R.id.board_main_menu_write-> { //글쓰기 메뉴 클릭 시
+                    val act =activityas BoardMainActivity
+                    act.fragmentController("board_write", true, true)
+                    true
+                }
+                R.id.board_main_menu_controller-> { //다른 항목 메뉴 컨트롤러 클릭 시,
+                    // -> 프래그먼트 이동시킬 건데,
+                    val act =activityas BoardMainActivity
+                    act.fragmentController("menu_controller", true, true)
+                    true
+                }
+
+                else -> false
+            }
+}
+
+//리사이클러뷰 설정
+        // (1) 어댑터 객체 생성t
+        val boardMainRecyclerAdapter = BoardMainRecyclerAdapter()
+        binding.boardMainRecycler.adapter= boardMainRecyclerAdapter
+        // (2) 레이아웃 매니저 사용 -> 어댑터로 만든 항목 레이아웃 배치
+        binding.boardMainRecycler.layoutManager= LinearLayoutManager(requireContext())
+        // (3) 아이템 데코레이션 - 구분선 생성
+        binding.boardMainRecycler.addItemDecoration(DividerItemDecoration(requireContext(), 1))
+
+        //항목 속 데이터를 불러오는 함수 (F=불러오고 T=초기화함)
+        getContentList(false)
+
+        return binding.root
+}
+
+    //리사이클러 뷰 사용 위한 클래스 생성 - 내부에서 재정의 필요한 함수
+    inner class BoardMainRecyclerAdapter : RecyclerView.Adapter<BoardMainRecyclerAdapter.ViewHolderClass>(){
+        //1) 재정의 : onCReateViewHolder() 뷰 홀더준비 위해 '자동 호출'됨
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderClass {
+                //바인딩
+            val boardMainRecyclerItemBinding = BoardMainRecyclerItemBinding.inflate(layoutInflater)
+            val holder = ViewHolderClass(boardMainRecyclerItemBinding)
+            //각 항목 하나 당 레이아웃 크기 설정
+            val layoutParams = RecyclerView.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, //가로 길이
+                ViewGroup.LayoutParams.WRAP_CONTENT//세로 길이
+            )
+            //위 설정을 레이아웃에 세팅
+            boardMainRecyclerItemBinding.root.layoutParams= layoutParams
+            //각 항목 터치 시 호출될 리스너 설정해둠
+            boardMainRecyclerItemBinding.root.setOnClickListener(holder)
+
+            return holder
+        }
+        //2) 재정의 : onBindViewHolder() 뷰 홀더 각 항목에 데이터 출력 위한 역할 (자동 호출됨)
+        override fun onBindViewHolder(holder: ViewHolderClass, position: Int) {
+            //사용자 클릭한 항목의 position 번째에 있는 List 속 데이터를 뷰 홀더 안에 각각 데이터 삽입처리
+            holder.boardMainItemNickname.text= contentWriterList[position]
+            holder.boardMainItemSubject.text= contentSubjectList[position]
+            holder.boardMainItemWriteDate.text= contentWriteDateList[position]
+        }
+        //3) 재정의 : getITemCount() 항목 개수 판단을 위해 '자동 호출'됨
+        override fun getItemCount(): Int {
+            return contentIdxList.size
+        }
+
+        //  뷰 홀더 클래스 Inner 클래스로 생성
+        inner class ViewHolderClass(boardMainRecyclerItemBinding:BoardMainRecyclerItemBinding)
+            : RecyclerView.ViewHolder(boardMainRecyclerItemBinding.root), View.OnClickListener{
+
+            //'각 항목 하나 구성하는 데이터 주소'값을 각각 여기서 바인딩 처리
+            val boardMainItemNickname = boardMainRecyclerItemBinding.boardMainItemNickname
+            val boardMainItemSubject = boardMainRecyclerItemBinding.boardMainItemSubject
+            val boardMainItemWriteDate = boardMainRecyclerItemBinding.boardMainItemWriteDate
+
+            //'각 항목' 터치 시 자동 호출 메소드()
+            override fun onClick(v: View?) {
+                val act =activityas BoardMainActivity
+                //액티비티의 '읽기 idx'값 <- 현재 항목 터치한 내용물 idx값 줌
+                //여기서 처리하면 '게시글 읽기 화면'에서 이 idx 값을 기준으로 게시글 읽기 화면 구성 O
+                act.readContentIdx = contentIdxList[adapterPosition]
+
+                act.fragmentController("board_read", true, true)
+            }
+        }
+    }
+
+    //항목데 담을 데이터를 초기화 or 세팅하는 함수
+    fun getContentList(clear:Boolean){ //T : 4개의 데이터 list 초기화 / F: 냅둠
+
+        if(clear == true){ //4개 목록 데이터리스트 초기화시킴
+            contentIdxList.clear()
+            contentWriterList.clear()
+            contentSubjectList.clear()
+            contentWriteDateList.clear()
+        }
+
+        //서버 통신 - 데이터 가져와서 채움
+thread{
+val client = OkHttpClient()
+            val site = "http://${ServerInfo.SERVER_IP}:8080/App_GroupCharge_Server/get_content_list.jsp"
+
+            val act =activityas BoardMainActivity
+            //현재 선택한 게시판 목록 idx값을 서버로 보낼 데이터로 세팅 처리
+            val builder1 = FormBody.Builder()
+            builder1.add("content_board_idx", "${act.selectedBoardType}")
+
+            val formBody = builder1.build()
+
+            val request = Request.Builder().url(site).post(formBody).build()
+            val response = client.newCall(request).execute()
+
+            if(response.isSuccessful == true)  { //통신 성공 시
+                val resultText = response.body?.string()!!.trim()
+                val root = JSONArray(resultText) //Array 에 담아준 뒤
+                //for문 돌면서 각 JSON 객체의 데이터를 옮김김
+
+                for(i in 0untilroot.length()) {
+                    val obj = root.getJSONObject(i)
+
+                    contentIdxList.add(obj.getInt("content_idx"))
+                    contentWriterList.add(obj.getString("content_nick_name"))
+                    contentWriteDateList.add(obj.getString("content_write_date"))
+                    contentSubjectList.add(obj.getString("content_subject"))
+                }
+                //화면 구성 전환
+activity?.runOnUiThread{
+//Recycler 뷰 어댑터에게 Data 세팅 변경 알리고 -> 갱신 처리
+                    binding.boardMainRecycler.adapter?.notifyDataSetChanged() //데이터 갱신 명령
+}
+}
+}
+
+}
+
+}
+```
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/d1feb19d-6b71-4ed2-a043-792e99fec413/Untitled.png)
+
+---
+
+## 🟦 ‘메뉴’ 컨트롤러 프래그먼트 관련 작업
+
+### ▶️ 메뉴 컨트롤러 프래그먼트 관련 작업 처리
+
+- 1) 각 게시글 목록 아이콘 → 이름값 주기
+- 2) 각 게시글 목록 아이콘 클릭 시 → 해당 게시글 목록 idx 값에 따라 화면 전환 처리
+
+---
+
+### **🟧 BoardMenuControlFragment.kt**
+
+- 1) 각각의 아이콘 클릭 시, viewBinding 사용하여 이벤트 처리
+- 2) 이 프래그먼트를 관리하는 BoardMainActivity 액티비티의 변수 act.selectedBoardType 값을 사용하여 각 아이콘의 게시글 목록 idx 값을 컨트롤했다.
+
+◾ 코드 
+
+```kotlin
+package com.example.appgrouppurchasemaching.board
+
+import android.os.Bundle
+import androidx.fragment.app.Fragment
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import com.example.appgrouppurchasemaching.databinding.FragmentMenuControlBinding
+
+class MenuControlFragment : Fragment() { //메뉴 컨트롤할 프래그먼트
+
+    //바인딩
+    lateinit var binding: FragmentMenuControlBinding
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        // Inflate the layout for this fragment
+        //바인딩
+        binding = FragmentMenuControlBinding.inflate(inflater)
+        //title
+        binding.menuControlToolbar.title= "메뉴 카테고리"
+
+        //Back 버튼을 툴바 상단의 navigationIcon으로 추가한다.
+        val navIcon = requireContext().getDrawable(androidx.appcompat.R.drawable.abc_ic_ab_back_material)
+        binding.menuControlToolbar.navigationIcon= navIcon
+
+        //수정) 뒤로가기 네비게이션 클릭 이벤트 처리
+        binding.menuControlToolbar.setNavigationOnClickListener{
+val act =activityas BoardMainActivity
+            act.fragmentRemoveBackStack("menu_controller")
+}
+
+//'전체 게시글' 목록 이동
+        binding.all.setOnClickListener{
+val act =activityas BoardMainActivity
+            act.selectedBoardType = 0
+            act.fragmentController("board_main", true, true)
+}
+//'배달 음식' 공구 목록 이동
+        binding.delivery.setOnClickListener{
+val act =activityas BoardMainActivity
+            act.selectedBoardType = 1
+            act.fragmentController("board_main", true, true)
+}
+//'일반 잡화' 공구 목록 이동
+        binding.general.setOnClickListener{
+val act =activityas BoardMainActivity
+            act.selectedBoardType = 2
+            act.fragmentController("board_main", true, true)
+}
+//'의류' 공구 목록 이동
+        binding.clothes.setOnClickListener{
+val act =activityas BoardMainActivity
+            act.selectedBoardType = 3
+            act.fragmentController("board_main", true, true)
+}
+//'회원권 양도' 글 목록 이동
+        binding.toss.setOnClickListener{
+val act =activityas BoardMainActivity
+            act.selectedBoardType = 4
+            act.fragmentController("board_main", true, true)
+}
+
+return binding.root
+}
+
+}
+```
+
+### **🟧 최종 모습**
 
