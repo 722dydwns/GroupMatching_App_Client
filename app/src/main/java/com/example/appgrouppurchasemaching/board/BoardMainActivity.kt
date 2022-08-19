@@ -28,6 +28,8 @@ class BoardMainActivity : AppCompatActivity() { //게시판 메인 액티비티
     val boardIndexList = ArrayList<Int>()
     //현재 선택된 게시판 목록 idx 값
     var selectedBoardType = 0 //기본값 - 0
+    //현재 읽고있는 게시글의 idx값
+    var readContentIdx = 0
 
     //권한 확인 리스트
     @RequiresApi(Build.VERSION_CODES.Q)
@@ -75,7 +77,6 @@ class BoardMainActivity : AppCompatActivity() { //게시판 메인 액티비티
                 }
             }
         }
-
 
         //초기 화면 프래그먼트 설정
         //fragmentController("board_main", false,false)

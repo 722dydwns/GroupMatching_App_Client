@@ -11,6 +11,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -180,6 +181,11 @@ class BoardWriteFragment : Fragment() {//글쓰기 프래그먼트 화면
                         val response = client.newCall(request).execute()
 
                         if(response.isSuccessful == true){ //서버 통신 성공 시,
+                            //서버가 보내온 응답 결과 받음 = read_content_idx값
+                            val resultText = response.body?.string()!!.trim()
+                            act.readContentIdx = Integer.parseInt(resultText)
+                            //Log.d("test", "${act.readContentIdx}")
+
                             //화면 관련 작업은 runOnUiThread 처리
                             activity?.runOnUiThread {
                                 //키보드 숨김 설정 - 글 작성 중이던 키보드 숨기기 처리

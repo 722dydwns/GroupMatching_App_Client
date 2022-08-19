@@ -37,6 +37,36 @@ class MenuControlFragment : Fragment() { //메뉴 컨트롤할 프래그먼트
             act.fragmentRemoveBackStack("menu_controller")
         }
 
+        //'전체 게시글' 목록 이동
+        binding.all.setOnClickListener {
+            val act = activity as BoardMainActivity
+            act.selectedBoardType = 0
+            act.fragmentController("board_main", true, true)
+        }
+        //'배달 음식' 공구 목록 이동
+        binding.delivery.setOnClickListener {
+            val act = activity as BoardMainActivity
+            act.selectedBoardType = 1
+            act.fragmentController("board_main", true, true)
+        }
+        //'일반 잡화' 공구 목록 이동
+        binding.general.setOnClickListener {
+            val act = activity as BoardMainActivity
+            act.selectedBoardType = 2
+            act.fragmentController("board_main", true, true)
+        }
+        //'의류' 공구 목록 이동
+        binding.clothes.setOnClickListener {
+            val act = activity as BoardMainActivity
+            act.selectedBoardType = 3
+            act.fragmentController("board_main", true, true)
+        }
+        //'회원권 양도' 글 목록 이동
+        binding.toss.setOnClickListener {
+            val act = activity as BoardMainActivity
+            act.selectedBoardType = 4
+            act.fragmentController("board_main", true, true)
+        }
 
         return binding.root
     }

@@ -35,7 +35,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="게시글 바로가기"
+                    android:text="공동구매/회원권 양도"
                     android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
                 <LinearLayout
@@ -43,32 +43,39 @@
                     android:layout_height="150dp">
 
                     <ImageView
-                        android:id="@+id/category1"
+                        android:id="@+id/all"
                         android:layout_width="120dp"
                         android:layout_height="120dp"
                         android:layout_weight="1"
                         android:src="@drawable/main_icon_all" />
 
                     <ImageView
-                        android:id="@+id/category2"
+                        android:id="@+id/delivery"
                         android:layout_width="120dp"
                         android:layout_height="120dp"
                         android:layout_weight="1"
                         android:src="@drawable/main_icon_delivery" />
 
                     <ImageView
-                        android:id="@+id/category3"
+                        android:id="@+id/general"
                         android:layout_width="120dp"
                         android:layout_height="120dp"
                         android:layout_weight="1"
                         android:src="@drawable/main_icon_general" />
 
                     <ImageView
-                        android:id="@+id/category4"
+                        android:id="@+id/clothes"
                         android:layout_width="120dp"
                         android:layout_height="120dp"
                         android:layout_weight="1"
                         android:src="@drawable/main_icon_clothes" />
+
+                    <ImageView
+                        android:id="@+id/toss"
+                        android:layout_width="120dp"
+                        android:layout_height="120dp"
+                        android:layout_weight="1"
+                        android:src="@drawable/main_icon_toss" />
                 </LinearLayout>
 
                 <TextView
