@@ -3029,8 +3029,7 @@ return binding.root
     ```
     
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/662539dd-631a-4cce-8e0d-594ea83df5ff/Untitled.png)
-
+<img width="551" alt="최종1" src="https://user-images.githubusercontent.com/39732720/185773491-f7b6a2e3-4594-4deb-89ea-0f0a52026816.png">
 ---
 
 ### 🙋🏻‍♀️(**2) 글에서 삭제 메뉴 클릭 시 → DB 상의 글 삭제되고 게시글 목록 화면 전환**됨.
@@ -3135,8 +3134,6 @@ return binding.root
         //항목 속 데이터를 불러오는 함수 (F=불러오고 T=초기화함)
         getContentList(true) //싹 비우고 매번 이 화면에 오면 새롭게 DB 상에서 데이터 읽어 구성하도록
         ```
-        
-    
-    ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/92c77d9c-466f-4860-acfc-ef03fa550efb/Untitled.png)
+<img width="634" alt="최종2" src="https://user-images.githubusercontent.com/39732720/185773492-f555ce90-5c4a-4adc-a856-019a353f0d26.png">
     
     ---
