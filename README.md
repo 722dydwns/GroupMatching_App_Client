@@ -2916,4 +2916,227 @@ return binding.root
 <img width="719" alt="메뉴 컨트롤 최종" src="https://user-images.githubusercontent.com/39732720/185574562-95ca491c-1cc5-44df-ae3f-15ca45f995f1.png">
 ---
 
+## 🟦 게시글 삭제 처리
 
+### ▶️ 게시글 삭제 처리 기능
+
+- **(1) 해당 글의 ‘작성자’에 한해서 수정, 삭제 메뉴 나타나도록 처리**한다.
+- (**2) 글에서 삭제 메뉴 클릭 시 → DB 상의 글 삭제되고 게시글 목록 화면 전환**됨.
+
+---
+
+### 🙋🏻‍♀️**(1) 해당 글의 ‘작성자’에 한해서 수정, 삭제 메뉴 나타나도록 처리**한다.
+
+### **🟧 [서버] get_content.jsp**
+
+- 1) 우선 삭제할 글의 작성자 정보를 확인해야 하므로 DB 상의 게시글 내용물 SELECT 처리했던 get_content.jsp에서 content_writer_idx 값을 추출한다.
+- 2) 이 추출한 값을 ‘클라이언트’에게 응답 결과로 보내준다.
+
+```java
+<% 
+                             (생략) . . .
+	//sql 문 작성
+	String sql = "select a1.content_subject, a2.user_nick_name as content_nick_name, "
+			+ "date_format(a1.content_write_date, '%Y-%m-%d') as content_write_date, a1.content_text, a1.content_image, a1.content_writer_idx "
+			+ "from content_table a1, user_table a2 "
+			+ "where a1.content_writer_idx = a2.user_idx "
+			+ "and content_idx = ?;";
+					. . .  (생략) 
+			
+	//여기서 select 정보는 1행이므로 JSON Object 객체에 담을 예정
+	JSONObject obj = new JSONObject();
+	
+	//DB 상에서 추출한 데이터 임시로 뽑아온 뒤 
+	String contentSubject = rs.getString("content_subject");
+	String contentNickName = rs.getString("content_nick_name");
+	String contentWriteDate = rs.getString("content_write_date");
+	String contentText = rs.getString("content_text");
+	String contentImage = rs.getString("content_image");
+	//***** (작성자 idx)값 추출해서 뽑음
+	int contentWriterIdx = rs.getInt("content_writer_idx");
+	
+	//json object객체에 다시 세팅 
+	obj.put("content_subject", contentSubject);
+	obj.put("content_nick_name", contentNickName);
+	obj.put("content_write_date", contentWriteDate);
+	obj.put("content_text", contentText);
+	obj.put("content_image", contentImage);
+	//***** 추출한 작성자 idx 값을 JSON 객체에 응답 결과로 포함시킴
+	obj.put("content_writer_idx", contentWriterIdx);
+	
+	//접속 종료
+	conn.close();
+%>
+<%= obj.toJSONString() %>
+```
+
+### **🟧 BoardReadFragment.kt**
+
+**→ ‘게시글 읽기 화면’ 메뉴 바에서.**
+
+**‘수정, 삭제’ 메뉴의 등장을 (현재 로그인 사용자 = 작성자 사용자 인 경우)에 한해서 이벤트 처리해주어야 하므로.   서버 통신 후 , runOnUiThread{ } 내부에서 모듈 작성**한다.
+
+- 1) 서버로부터 데이터 받았던 부분에서 ‘**작성자 idx’값 추출**
+- 2) Preferences에 저장해뒀던 **‘현재 로그인한 사용자 idx값’ 도 함께 추출**
+    - **if(작성자 idx값 == 현재 로그인한 사용자 idx값)**
+    - **→ 이 글에 대해서는 게시글 수정, 삭제 메뉴 나타나게 화면 구성**
+    
+    ```kotlin
+    //서버로부터 글 내용 데이터 받기
+    thread{
+    val client = OkHttpClient()
+      val site = "http://${ServerInfo.SERVER_IP}:8080/App_GroupCharge_Server/get_content.jsp"
+    
+    									 . . . 	(생략 ) . . . . . 
+    
+        //요청에 대한 응답은 response로 받고
+        val response = client.newCall(request).execute()
+    
+        if(response.isSuccessful == true) { //서버 통신 성공 시
+            val resultText = response.body?.string()!!.trim()
+            val obj = JSONObject(resultText)
+    
+            **//'작성자' idx 값을 JSON 객체에서 추출하고
+            val contentWriterIdx = obj.getInt("content_writer_idx")**
+    
+    //게시글 읽기 화면의 뷰 세팅해준다- 받은 데이터들로
+    activity?.runOnUiThread{
+    
+    											. . . (생략) . . . 
+    
+        **->   //Preferences에 저장해뒀던 현재 '로그인' 사용자 idx값 가져옴
+                val pref = requireContext().getSharedPreferences("login_data", Context.MODE_PRIVATE)
+                val loginUserIdx = pref.getInt("login_user_idx", -1) //두 번째 매개변수는 get한 데이터 값 없을 경우 기본 반환값임
+    
+                if(loginUserIdx == contentWriterIdx) { //현 로그인 idx == 작성자 idx인 경우에 한해서
+                    //'수정' 삭제' 메뉴 구성 - 바인딩 처리
+                    binding.boardReadToolbar.inflateMenu(R.menu.board_read_menu)
+                    //이벤트 처리
+                    binding.boardReadToolbar.setOnMenuItemClickListener{
+    when(it.itemId) {
+                            R.id.board_read_menu_modify-> { //'수정' 클릭 시
+                                val act =activityas BoardMainActivity
+                                act.fragmentController("board_modify", true, true)
+                                true
+                            }
+                            R.id.board_read_menu_delete-> { //'삭제' 클릭 시
+                                val act =activityas BoardMainActivity
+                                act.fragmentRemoveBackStack("board_read") //'우선 뒤로가기 처리''
+                                true
+                            }
+                            else -> false
+                        }**
+    ```
+    
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/662539dd-631a-4cce-8e0d-594ea83df5ff/Untitled.png)
+
+---
+
+### 🙋🏻‍♀️(**2) 글에서 삭제 메뉴 클릭 시 → DB 상의 글 삭제되고 게시글 목록 화면 전환**됨.
+
+### **🟧 [서버] delete_content.jsp**
+
+1) 클라이언트로부터 ‘삭제할 게시글 idx값’을 받음
+
+2) DB에서 삭제할 게시글 idx 값을 갖는 content 데이터 행 DELETE 처리함
+
+```kotlin
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ page import = "java.sql.*" %>
+<%
+
+	//클라이언트가 전달하는 데이터 한글 깨지지 않도록 설정
+	request.setCharacterEncoding("utf-8");
+
+	//클라이언트가 전달한 데이터 = 삭제할 게시글 idx 값 
+	String str1 = request.getParameter("content_idx");
+	int contentIdx = Integer.parseInt(str1);
+	
+	//DB 접속 정보 세팅
+	String dbUrl = "jdbc:mysql://localhost:3306/groupapp_db";
+	String dbId = "root";
+	String dbPw = "1234";
+	
+	//드라이버 로딩
+	Class.forName("com.mysql.cj.jdbc.Driver");
+	
+	//DB 실질적 접속
+	Connection conn = DriverManager.getConnection(dbUrl, dbId, dbPw);
+	
+	//sql 문 작성
+	String sql = "delete from content_table where content_idx = ?";
+	
+	//실질적 sql 실행 
+	PreparedStatement pstmt = conn.prepareStatement(sql);
+	pstmt.setInt(1, contentIdx);
+	
+	pstmt.execute();
+	
+	//DB 접속 종료
+	conn.close();
+%>
+```
+
+### **🟧 [클라이언트] BoardReadFragment.kt**
+
+- **이 화면 속 툴바의 메뉴 클릭 이벤트 처리 구문에서 ‘삭제’ 메뉴 클릭 시 이벤트 처리 수행**
+    - 1) thread{ } 가동해서 서버에게 현재 읽고 있는 게시글(삭제할) idx값을 보낸다.
+    - 2) 서버에서는 해당 idx값 갖는 DB 의 데이터 삭제 처리함
+    - 3) 작업 마치면 ‘게시글 목록 화면’으로 전환시킴
+    
+    ```kotlin
+    R.id.board_read_menu_delete -> { //'삭제' 클릭 시
+    
+      thread{
+          //현재 읽고 있는 게시글 idx 번호가 액티비티에 있으므로
+          val act = activity as BoardMainActivity
+    
+          //-> 서버에게 현재 (삭제누른) 게시글 idx 값을 보냄 -삭제처리
+          val client = OkHttpClient()
+          val site = "http://${ServerInfo.SERVER_IP}:8080/App_GroupCharge_Server/delete_content.jsp"
+          //서버에게 보낼 데이터 세팅
+          val builder1 = FormBody.Builder()
+          builder1.add("content_idx", "${act.readContentIdx}")
+          val formBody = builder1.build()
+    
+          val request = Request.Builder().url(site).put(formBody).build()
+          val response = client.newCall(request).execute()
+    
+          if(response.isSuccessful == true) {
+              activity?.runOnUiThread {  //화면 관련 처리 thread
+                  val dialogBuilder = AlertDialog.Builder(requireContext())
+                  dialogBuilder.setTitle("글 삭제")
+                  dialogBuilder.setMessage("글이 삭제되었습니다.")
+                  dialogBuilder.setPositiveButton("확인"){ dialogInterface: DialogInterface, i: Int ->
+                      //'게시글 목록 화면'으로 화면 전환 처리
+                      val act = activity as BoardMainActivity
+                      act.fragmentRemoveBackStack("board_read")
+                  }
+                  dialogBuilder.show()
+              }
+          }
+      }
+    
+      true
+    }
+    else -> false
+    }
+    ```
+    
+    ### **🟧 [클라이언트] BoardMainFragment.kt**
+    
+    - 삭제 처리 후 → 화면 전환이 된 ‘게시글 목록 화면’
+    - 이 곳에서도 삭제된 게시글이 목록 상에 나타나지 않도록 해야 함
+        - → 따라서 ) OnCreateView() 가장 마지막 블록에 getContentList(true) 값을 주어 매번 새롭게 DB 상에서 데이터 가져와 출력하여 목록 구성하도록 처리한다.
+        
+        ```kotlin
+        //항목 속 데이터를 불러오는 함수 (F=불러오고 T=초기화함)
+        getContentList(true) //싹 비우고 매번 이 화면에 오면 새롭게 DB 상에서 데이터 읽어 구성하도록
+        ```
+        
+    
+    ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/92c77d9c-466f-4860-acfc-ef03fa550efb/Untitled.png)
+    
+    ---
