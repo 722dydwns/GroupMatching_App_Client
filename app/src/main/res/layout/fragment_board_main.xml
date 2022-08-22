@@ -13,9 +13,16 @@
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/board_main_recycler"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/board_main_swipe"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/board_main_recycler"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </LinearLayout>

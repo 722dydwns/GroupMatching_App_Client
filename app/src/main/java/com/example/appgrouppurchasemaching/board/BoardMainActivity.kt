@@ -30,6 +30,8 @@ class BoardMainActivity : AppCompatActivity() { //게시판 메인 액티비티
     var selectedBoardType = 0 //기본값 - 0
     //현재 읽고있는 게시글의 idx값
     var readContentIdx = 0
+    //목록 상 현재 있는 페이지 번호 변수
+    var nowPage = 1
 
     //권한 확인 리스트
     @RequiresApi(Build.VERSION_CODES.Q)

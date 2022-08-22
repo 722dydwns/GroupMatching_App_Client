@@ -94,9 +94,33 @@ class BoardMainFragment : Fragment() { //게시판 목록 메인 프래그먼트
         binding.boardMainRecycler.layoutManager = LinearLayoutManager(requireContext())
         // (3) 아이템 데코레이션 - 구분선 생성
         binding.boardMainRecycler.addItemDecoration(DividerItemDecoration(requireContext(), 1))
+            //리사이클러뷰에서 사용자의 스크롤 시 이벤트 처리
+        binding.boardMainRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener(){
+                // 스크롤이 끝나면 자동 호출되는 함수 재정의
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+
+                    //현재 화면에 보이는 항목 중 가장 마지막 화면의 idx 값 가져오기
+                    val index1 = (recyclerView.layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
+
+                    //리사이클러 뷰가 관리하는 항목의 총 개수
+                    val count1 = recyclerView.adapter?.itemCount
+
+                    if(index1 + 1 == count1) {
+                        act.nowPage = act.nowPage + 1
+                        getContentList(false) //계속 뒤에 이어붙여서 데이터 가져와야 하므로
+                    }
+            }
+        })
 
         //항목 속 데이터를 불러오는 함수 (F=불러오고 T=초기화함)
         getContentList(true) //싹 비우고 매번 이 화면에 오면 새롭게 DB 상에서 데이터 읽어 구성하도록
+
+        //새로고침 기능 이벤트 처리 -> swiper
+        binding.boardMainSwipe.setOnRefreshListener {
+            getContentList(true) //다시 데이터 한 번 더 새롭게 가져오고
+            binding.boardMainSwipe.isRefreshing = false //계속 스와이프 돌아가는 것 없애줌
+        }
 
         return binding.root
     }
@@ -161,6 +185,10 @@ class BoardMainFragment : Fragment() { //게시판 목록 메인 프래그먼트
             contentWriterList.clear()
             contentSubjectList.clear()
             contentWriteDateList.clear()
+
+            val act = activity as BoardMainActivity
+            act.nowPage = 1 //매번 새로운 페이지로 갱신하도록
+
         }
 
         //서버 통신 - 데이터 가져와서 채움
@@ -172,6 +200,7 @@ class BoardMainFragment : Fragment() { //게시판 목록 메인 프래그먼트
             //현재 선택한 게시판 목록 idx값을 서버로 보낼 데이터로 세팅 처리
             val builder1 = FormBody.Builder()
             builder1.add("content_board_idx", "${act.selectedBoardType}")
+            builder1.add("page_num", "${act.nowPage}")
 
             val formBody = builder1.build()
 
@@ -191,6 +220,12 @@ class BoardMainFragment : Fragment() { //게시판 목록 메인 프래그먼트
                     contentWriteDateList.add(obj.getString("content_write_date"))
                     contentSubjectList.add(obj.getString("content_subject"))
                 }
+
+                //만약 가져온 것이 하나도 없다면, 존재X 인 페이지이므로 마지막 페이지를 하나 빼준다.
+                if(root.length() == 0 ){
+                    act.nowPage = act.nowPage - 1 //이전 페이지를 마지막 페이지로 계속 유지시킴킴
+               }
+
                 //화면 구성 전환
                 activity?.runOnUiThread {
                     //Recycler 뷰 어댑터에게 Data 세팅 변경 알리고 -> 갱신 처리
