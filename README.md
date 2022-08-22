@@ -3137,3 +3137,411 @@ return binding.root
 <img width="634" alt="최종2" src="https://user-images.githubusercontent.com/39732720/185773492-f555ce90-5c4a-4adc-a856-019a353f0d26.png">
     
     ---
+
+## 🟦 게시글 수정 처리-(1)
+
+### ▶️ 게시글 수정 처리하기
+
+- 현재 읽고 있는 게시글 수정 처리 기능
+- **‘수정’ 메뉴 클릭** 시, 게시글 수정 화면으로 전환 + 해당 idx의 작성된 글 내용값도 나타나도록 한다.
+- 게시글 수정 화면에서 **카메라로 사진을 찍거나 앨범에서 사진 선택**하면, 해당 사진을 다시 **서버로 전송하여 DB UPDATE 처리**해야 함
+- 수정 완료되면 다시 수정된 데이터 담은  게시글 읽기 화면으로 전환된다.
+
+---
+
+### **🟧 [서버] get_content.jsp**
+
+- 우선 사용자가 현재 선택한 게시글의 idx값을 추출해놓아야 한다.
+- 따라서 DB 상에 SELECT 해올 데이터 중에 content_board_idx값도 추가하여 추출하고 JSON 객체에도 추가해준다.
+- **→ (수정 전) 게시글 내용물 데이터를 ‘게시글 수정 화면’에도 띄워주어야 하기 때문에 필요함**
+
+### **🟧 [클라이언트] BoardModifyFragment.kt**
+
+- 서버 get_content.jsp 에서 보내주는 데이터를 사용하기 위해 네트워크 통신.
+- **(1) 스피너 Spinner 구성하기**
+    - 사용자가 수정을 원하는 게시글 목록 idx 값이 다를 수 있으므로 DB 상에 존재하는 글 목록을 구성할 스피너를 ‘수정 화면’ 상에도 한 번 더 세팅해준다.
+    
+    ```kotlin
+    //Spinner 구성 - 게시글 수정 시: 카테고리 변경을 할 수도 있으므로 별도의 스피너 구성한다.
+    				val spinnerAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, act.boardNameList.drop(1))
+    				spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+    				binding.boardModifyType.adapter= spinnerAdapter
+    				binding.boardModifyType.setSelection(obj.getInt("content_board_idx") - 1)
+    ```
+    
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/73517796-d9ac-49db-ac31-5af0dbe5a05c/Untitled.png)
+
+- **(2) 게시글 수정 화면에도 기존 (수정처리 전)  게시글 데이터를 화면 상에 띄워주기**
+
+```kotlin
+//서버 통신 작업
+thread{
+		val client = OkHttpClient()
+    val site = "http://${ServerInfo.SERVER_IP}:8080/App_GroupCharge_Server/get_content.jsp"
+
+    //현재 읽고 있는 게시글 idx값을 서버에 보낼 데이터로 세팅
+    val builder1 = FormBody.Builder()
+    builder1.add("read_content_idx", "${act.readContentIdx}")
+    val formBody = builder1.build()
+
+    val request = Request.Builder().url(site).post(formBody).build()
+
+    val response = client.newCall(request).execute()
+
+    if(response.isSuccessful == true){ //'서버 통신' 성공 시,
+        val resultText = response.body?.string()!!.trim() //데이터 응답 받아서
+        val obj = JSONObject(resultText)
+
+**//게시글 수정 화면에 데이터 처리 = 수정하려고 선택한 게시글의 내용물 데이터를 세팅**
+        act.runOnUiThread{
+						binding.boardModifySubject.setText(obj.getString("content_subject"))
+            binding.boardModifyText.setText(obj.getString("content_text"))
+            val contentImage = obj.getString("content_image")
+
+            if(contentImage == "null"){ //DB 데이터 상 이미지 null값인 경우
+                binding.boardModifyImage.visibility= View.GONE
+																												//이미지 뷰 사라지게 함
+            }else { //DB 데이터 상 이미지 존재하면
+								thread{
+								val imageUrl = URL("http://${ServerInfo.SERVER_IP}:8080/App_GroupCharge_Server/upload/$contentImage")
+								val bitmap = BitmapFactory.decodeStream(imageUrl.openConnection().getInputStream())
+								activity?.runOnUiThread{
+								binding.boardModifyImage.setImageBitmap(bitmap) //이미지 세팅 처리
+			}
+   }
+}
+```
+
+- **(3) Toolbar 위에 존재하는 ‘카메라/갤러리’ 탭 버튼에 대한 이벤트 처리**
+    - → ‘게시글 수정’ 시에 사용자가 이미지 변경을 원한다면 그에 대한 처리를 해야 하기 때문.
+    - → ‘게시글 작성 화면’에서 카메라/갤러리 탭 메뉴에 처리했떤 입네트 처리를 그대로 구성하되, 이전 이미지 데이터도 구성할 수 있도록 이미지 뷰를 보이도록 처리.
+
+```kotlin
+binding.boardModifyImage.visibility = View.VISIBLE //이미지 보이게
+```
+
+---
+
+## 🟦 게시글 수정 처리-(1)
+
+### **🟧 [서버] modify_content.jsp**
+
+- **→ (수정 후) 게시글 내용물을 다시 서버에게 보내서 DB 상에 저장시켜야 하기 때문에 필요함**
+
+```kotlin
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ page import="java.sql.*"%>
+<%@ page import = "com.oreilly.servlet.*" %>
+<%@ page import = "com.oreilly.servlet.multipart.*" %>
+<%
+	//클라이언트가 전달하는 데이터 한글 깨지지 않도록 설정
+	request.setCharacterEncoding("utf-8");
+
+	//실제 이미지 업로드할 upload 폴더의 경로 구하기 
+	String uploadPath = application.getRealPath("upload");
+	
+	//중복된 이름에 대한 정책 객체 
+	DefaultFileRenamePolicy policy = new DefaultFileRenamePolicy();
+	//Request 이미지 담을 multiRequest
+	MultipartRequest multi = new MultipartRequest(request, uploadPath, 100*1024*1024, policy);
+		
+	//클라이언트가 보낸 데이터 추출 
+	// 수정할 글 번호 idx값 추출
+	String str1 = multi.getParameter("content_idx");
+	int contentIdx = Integer.parseInt(str1);
+
+	//수정 이후 처리된 게시글 내용 데이터 차례로 받아 추출
+	String contentSubject = multi.getParameter("content_subject"); //글 제목
+	String contentText = multi.getParameter("content_text"); //글 내용text
+	String contentImage = multi.getFilesystemName("content_image"); //첨부 이미지 
+	String str2 = multi.getParameter("content_board_idx"); //게시글 목록 idx
+	int contentBoardIdx = Integer.parseInt(str2);
+
+	//DB 접속 정보 세팅
+	String dbUrl = "jdbc:mysql://localhost:3306/groupapp_db";
+	String dbId = "root";
+	String dbPw = "1234";
+	
+	//드라이버 로딩
+	Class.forName("com.mysql.cj.jdbc.Driver");
+	
+	//DB 실질적 접속
+	Connection conn = DriverManager.getConnection(dbUrl, dbId, dbPw);
+	
+	//이미지 존재 유무에 따르 처리 분기
+	if(contentImage == null) {
+		String sql = "update content_table "
+					+ "set content_subject = ?, content_text = ?, content_board_idx = ? "
+					+ "where content_idx = ?";
+		PreparedStatement pstmt = conn.prepareStatement(sql);
+		
+		pstmt.setString(1, contentSubject);
+		pstmt.setString(2, contentText);
+		pstmt.setInt(3, contentBoardIdx);
+		pstmt.setInt(4, contentIdx);
+		
+		pstmt.execute();
+	}else{
+		String sql = "update content_table "
+				+ "set content_subject = ?, content_text = ?, content_board_idx = ?, content_image = ? "
+				+ "where content_idx = ?";
+		PreparedStatement pstmt = conn.prepareStatement(sql);
+		
+		pstmt.setString(1, contentSubject);
+		pstmt.setString(2, contentText);
+		pstmt.setInt(3, contentBoardIdx);
+		pstmt.setString(4, contentImage);
+		pstmt.setInt(5, contentIdx);
+		
+		pstmt.execute();
+	}	
+	//데이터 베이스 접속 종료
+	conn.close();
+
+%>
+```
+
+### **🟧 [클라이언트] BoardModifyFragment.kt**
+
+- **1) 사용자가 수정한 (게시글 내용 데이터)를 다시 서버에 올려서 DB 상에 업로드 처리를 해야 한다.**
+- 2) ‘게시글 수정 완료’ 후 **사용자가 ‘upload’ 버튼 클릭 시**
+- → binding하여 사용자 입력값을 추출 → 데이터에 대한 유효성 검사 처리 → 서버 접속하여 이 데이터값들을 MultipartBody로 묶어서 세팅하고 → 서버에 이 데이터들을 DB에 업로드할 수 있게 POST 요청한다.
+
+```kotlin
+        R.id.board_modify_menu_upload-> { //업로드 클릭 시
+
+            //서버에 업로드 처리할 데이터(수정 후 내용물을 바인딩처리로) 추출
+            val boardModifySubject = binding.boardModifySubject.text.toString()
+            val boardModifyText = binding.boardModifyText.text.toString()
+            val boardModifyType = act.boardIndexList[binding.boardModifyType.selectedItemPosition+ 1]
+
+            //유효성 검사 하기
+            // 게시글 제목 유효성 검사
+            if(boardModifySubject == null || boardModifySubject.length == 0){
+                val dialogBuilder = AlertDialog.Builder(requireContext())
+                dialogBuilder.setTitle("제목 입력 오류")
+                dialogBuilder.setMessage("제목을 입력해주세요")
+                dialogBuilder.setPositiveButton("확인"){dialogInterface: DialogInterface, i: Int->
+binding.boardModifySubject.requestFocus() //입력칸에 재포커싱
+}
+dialogBuilder.show()
+                return@setOnMenuItemClickListener true
+            }
+            // 게시글 내용 text 유효성 검사
+            if(boardModifyText == null || boardModifyText.length == 0) {
+                val dialogBuilder = AlertDialog.Builder(requireContext())
+                dialogBuilder.setTitle("내용 입력 오류")
+                dialogBuilder.setMessage("내용을 입력해주세요")
+                dialogBuilder.setPositiveButton("확인"){dialogInterface: DialogInterface, i: Int->
+binding.boardModifyText.requestFocus() //입력칸에 재포커싱
+}
+dialogBuilder.show()
+                return@setOnMenuItemClickListener true
+            }
+
+            //'서버 접속'
+thread{
+val client = OkHttpClient()
+                val site =
+                    "http://${ServerInfo.SERVER_IP}:8080/App_GroupCharge_Server/modify_content.jsp"
+
+                //첨부이미지 존재할 수 있으므로 FormBody대신 MultipartBody로 사용
+                //서버에 보낼 작업 데이터 세팅
+                val builder1 = MultipartBody.Builder()
+                builder1.setType(MultipartBody.FORM)
+                builder1.addFormDataPart("content_idx", "${act.readContentIdx}")
+                builder1.addFormDataPart("content_subject", boardModifySubject)
+                builder1.addFormDataPart("content_text", boardModifyText)
+                builder1.addFormDataPart("content_board_idx", "$boardModifyType")
+
+                //이미지 데이터 세팅
+                var file: File? = null
+                if (uploadImage != null) { //이미지 null값 아니라면
+                    val filePath = requireContext().getExternalFilesDir(null).toString()
+                    val fileName = "/temp_${System.currentTimeMillis()}.jpg"
+                    val picPath = "$filePath/$fileName"
+                    file = File(picPath)
+                    val fos = FileOutputStream(file)
+                    uploadImage?.compress(Bitmap.CompressFormat.JPEG, 100, fos)
+                    //서버에 보낼 데이터에 마저 세팅
+                    builder1.addFormDataPart(
+                        "content_image",
+                        file.name,
+                        file.asRequestBody(MultipartBody.FORM)
+                    )
+                }
+                //서버에 요청
+                val formBody = builder1.build()
+                val request = Request.Builder().url(site).post(formBody).build()
+                val response = client.newCall(request).execute()
+
+                if (response.isSuccessful == true) { //통신 성공 시
+activity?.runOnUiThread{
+val inputMethodManager =
+                            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                        inputMethodManager.hideSoftInputFromWindow(
+                            binding.boardModifySubject.windowToken,
+                            0
+                        )
+                        inputMethodManager.hideSoftInputFromWindow(
+                            binding.boardModifyText.windowToken,
+                            0
+                        )
+
+                        val dialogBuilder = AlertDialog.Builder(requireContext())
+                        dialogBuilder.setTitle("수정완료")
+                        dialogBuilder.setMessage("수정이 완료되었습니다.")
+                        dialogBuilder.setPositiveButton("확인"){dialogInterface: DialogInterface, i: Int->
+act.fragmentRemoveBackStack("board_modify") //우선 현재 프래그먼트 종료시키기
+}
+dialogBuilder.show()
+}
+} else { //통신 실패한 경우
+activity?.runOnUiThread{
+val dialogBuilder = AlertDialog.Builder(requireContext())
+                        dialogBuilder.setTitle("수정오류")
+                        dialogBuilder.setMessage("수정 오류가 발생하였습니다.")
+                        dialogBuilder.setPositiveButton("확인", null)
+                        dialogBuilder.show()
+}
+}
+}
+true
+        }
+        else -> false
+    }
+}
+```
+
+### **🟧 수정 처리 전**
+
+![수정전.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/53a2ad0b-50f8-49ca-8cbb-554ffd2d2661/%EC%88%98%EC%A0%95%EC%A0%84.png)
+
+### **🟧 수정 처리 후**
+
+![수정 후 .png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/d9c8fd17-1065-4037-99b6-89cf9d72984e/%EC%88%98%EC%A0%95_%ED%9B%84_.png)
+
+### **🟧 게시글 목록 화면의 수정 전 후 상태 비교**
+
+![수정전후 모음.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/ed62445c-f125-488f-88fb-49c4359eebad/%EC%88%98%EC%A0%95%EC%A0%84%ED%9B%84_%EB%AA%A8%EC%9D%8C.png)
+
+---
+
+## 🟦 새로 고침 기능 구현하기
+
+### ▶️ 새로 고침 기능 구현
+
+- ‘**게시글 목록 화면’**에서 **사용자가 아래로 당기기를 할 경우, 목록이 새로고침 되도록 처리.**
+    
+    ### 📍**Swiperefreshlayout**
+    
+- → ‘**구글이 제공하는 새로 고침용 레이아웃’**
+- → **라이브러리 추가하여 사용**한다.
+
+```kotlin
+implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+```
+
+---
+
+### **🟧 1) Xml 레이아웃 코드에 SwipeRefreshLayout 추가**
+
+**◾ fragment_board_main.xml**
+
+- 구글 제공 라이브러리에서 새로고침 관련 레이아웃으로 목록 구성하던 RecyclerView를 감싸준다.
+
+```xml
+
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    android:id="@+id/board_main_swipe"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/board_main_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+```
+
+### **🟧 2) 새로고침 이벤트 처리**
+
+- **BoardMainFragment.kt 에서** 조금 전 추가했던 **SwipeRefreshLayout의 id를 binding하여 이벤트 처리 수행**
+
+```kotlin
+
+//새로고침 기능 이벤트 처리 -> swiper
+binding.boardMainSwipe.setOnRefreshListener{
+getContentList(true) //다시 데이터 한 번 더 새롭게 가져오고
+    binding.boardMainSwipe.isRefreshing= false //계속 스와이프 돌아가는 것 없애줌
+}
+```
+
+### **🟧 3) 새로운 에뮬레이터 실행해서 비교하기**
+
+[video1767686573 (online-video-cutter.com).mp4](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/a463f206-c6ba-4a7b-8d2f-dda95df4994c/video1767686573_(online-video-cutter.com).mp4)
+
+---
+
+## 🟦 무한 스크롤 기능 구현
+
+### ▶️ 무한 스크롤 기능 구현하기
+
+- **서버가 모든 글들의 글 목록 데이터를 클라이언트에게 전달해 줄 경우 너무 많은 데이터가 전달 될 수도 있다.**
+- 따라서, **현재 화면 구성에 필요한 데이터만 가져온 후 RcyclerView를 구성**
+- **그 이후 사용자가 아래롤 스크롤을 해서 마지막 까지 도착했을 경우 → 추가 데이터를 가져와 아래쪽에도 구성**
+- 그렇게 되면 **계속 스크롤을 해서 가장 마지막 글 목록까지 나올 수 있으므로 이 기능 자체를 ‘무한 스크롤’이라고 명명**한다.
+
+---
+
+### **🟧 [서버] get_content_list.jsp**
+
+- 게시글 목록 화면을 구성해주는 작업을 하므로 이 곳에서 처리
+
+```kotlin
+//  -> 각 페이지별로 목록 구성할 것. page_num도 받을 것이디ㅏ.
+	String str2 = request.getParameter("page_num");
+	int page_num = Integer.parseInt(str2);
+	
+	int startIndex = (page_num -1) * 10; //각 목록 시작 idx 값 구함
+
+// sql 문에 limit 두어 데이터 가져오기 
+sql += "order by a1.content_idx desc limit ?, 10;";
+                             // ?값에 시작 목록 번호 ~ 10개씩 데이터 가져옴
+```
+
+### **🟧 [클라이언트]**
+
+**1) BoardMainActivity.kt 에서 각 화면에 구성할 목록 데이터 10개 당 한 page로 설정할 용도로 nowPage 변수 선언** 
+
+**2) BoardMainFragment.kt**
+
+- (1) 액티비티의 **변수 nowPage를 사용**
+- (2) RecyclerView에서 **사용자가 ‘스크롤’ 시 이벤트 처리**
+
+```kotlin
+    //리사이클러뷰에서 사용자의 스크롤 시 이벤트 처리
+binding.boardMainRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener(){
+        // 스크롤이 끝나면 자동 호출되는 함수 재정의
+    override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+        super.onScrolled(recyclerView, dx, dy)
+
+            //현재 화면에 보이는 항목 중 가장 마지막 화면의 idx 값 가져오기
+            val index1 = (recyclerView.layoutManageras LinearLayoutManager).findLastVisibleItemPosition()
+
+            //리사이클러 뷰가 관리하는 항목의 총 개수
+            val count1 = recyclerView.adapter?.itemCount
+
+if(index1 + 1 == count1) {
+                act.nowPage = act.nowPage + 1
+                getContentList(false) //계속 뒤에 이어붙여서 데이터 가져와야 하므로
+            }
+    }
+})
+```
+
+---
