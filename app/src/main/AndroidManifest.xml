@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.appgrouppurchasemaching">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -11,7 +15,15 @@
         android:theme="@style/Theme.AppGroupPurchaseMaching"
         android:usesCleartextTraffic="true">
         <activity
-            android:name="com.example.appgrouppurchasemaching.board.BoardMainActivity"
+            android:name=".ServiceActivity"
+            android:exported="true" />
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyCWxie_s84vOaG1VMT5dRgndafpXe1Ntw8" />
+
+        <activity
+            android:name=".board.BoardMainActivity"
             android:exported="true" />
         <activity
             android:name=".intro.IntroActivity"
@@ -25,20 +37,21 @@
         </activity>
 
         <provider
-            android:authorities="com.example.appgrouppurchasemaching.camera.file_provider"
             android:name="androidx.core.content.FileProvider"
+            android:authorities="com.example.appgrouppurchasemaching.camera.file_provider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_path"/>
+                android:resource="@xml/file_path" />
         </provider>
-        
+
         <activity
             android:name=".intro.MainActivity"
             android:exported="true" />
     </application>
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    
     <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
 </manifest>

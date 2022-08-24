@@ -1,11 +1,14 @@
 package com.example.appgrouppurchasemaching.board
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.example.appgrouppurchasemaching.ServiceActivity
 import com.example.appgrouppurchasemaching.databinding.FragmentMenuControlBinding
+import com.example.appgrouppurchasemaching.intro.MainActivity
 
 class MenuControlFragment : Fragment() { //메뉴 컨트롤할 프래그먼트
 
@@ -66,6 +69,13 @@ class MenuControlFragment : Fragment() { //메뉴 컨트롤할 프래그먼트
             val act = activity as BoardMainActivity
             act.selectedBoardType = 4
             act.fragmentController("board_main", true, true)
+        }
+
+        //'지도' 클릭 시 지도 액티비티로 화면 전환 처리
+        binding.map.setOnClickListener {
+            //화면 전환 처리
+            val Intent = Intent(requireContext(), ServiceActivity::class.java)
+            startActivity(Intent)
         }
 
         return binding.root
