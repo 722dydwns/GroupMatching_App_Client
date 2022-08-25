@@ -82,8 +82,8 @@
             <ImageView
                 android:id="@+id/board_modify_image"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:src="@android:mipmap/sym_def_app_icon" />
+                android:layout_height="match_parent"
+                android:src="@drawable/image_icon" />
 
         </LinearLayout>
     </ScrollView>
