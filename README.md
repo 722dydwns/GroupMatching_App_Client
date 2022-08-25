@@ -3545,3 +3545,378 @@ if(index1 + 1 == count1) {
 ```
 
 ---
+
+---
+
+# 🙋🏻‍♀️ [지도] 연동하기 !
+
+## 🟦 앱에 LBS 지도 서비스 연동하기
+
+### ▶️ LBS : Location Based Service
+
+- **위치 기반의 서비스를 제공하는 Service 약자**
+- **현재 위치를 기준으로 사용자 위치를 ‘지속적으로’ 읽어와서 화면 상에 표시하고, 구글 open api를 활용하여 주변 정보를 표시**한다.
+
+---
+
+### ▶️ **구글 지도 사용하기**
+
+- **애플리케이션에서 구글 지도를 표시하는 작업** 수행
+- 구글 지도을 사용하기 위해서는 애플리케이션 등록부터 시작해서 많은 작업을 수행해야 한다.
+
+---
+
+### **🟧 1) 애플리케이션 등록**
+
+- **구글 지도 사용을 위해서는 구글 개발자 콘솔에 애플리케이션 등록 후 키 값을 발급 받아야 한다.**
+    
+    **(1) 프로젝트 생성**
+    
+    ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/6db257fe-9a55-46fd-8379-88e65c64fc2b/Untitled.png)
+    
+    **(2) API 서버스 사용 설정** 
+    
+    ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/183f0963-d333-4ddd-b3ce-113529fb15c1/Untitled.png)
+    
+    **(3) Maps SDK for Android 사용 선택**
+    
+    ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/c246ca08-a8c3-4ce7-89cc-eeb52e7da9cb/Untitled.png)
+    
+    **(4) 애플리케이션 등록** 
+    
+    - API Key 발급을 위해 인증 정보를 등록 한다.
+    - 좌측 상단 부분을 클릭한다.
+    
+    **(5) 사용자 인증 정보 만들기** 
+    
+    - API 키 발급 받고, 키에 대한 제한 설정
+    - 항목 추가 → 앱 패키지명/SHA-1 인증서 디지털 지문을 입력
+        - → cmd 창에 안드로이드 설치 경로로 이동해서 명령어 수행한 뒤 인증서 지문 문자열 복사
+    - 설정 완료 후 , 발급받은  API 키 값을 따로 저장시켜놓는다.
+    
+    **(6) AndroidManifest.xml에 다음과 같이 API 키 등록** 시킴
+    
+    ```xml
+    <meta-data
+        android:name="com.google.android.geo.API_KEY"
+        android:value="AIzaSyCWxie_s84vOaG1VMT5dRgndafpXe1Ntw8"/>
+    ```
+    
+    **(7) Google Play Service 패키지 설치**
+    
+    - Tools > SDK Manager에서 설치한다.
+    
+    **(8) App 수준의 build.gradle 에 다음 라이브러리를 추가**한다. 
+    
+    ```xml
+    implementation 'com.google.android.gms:play-services-maps:18.1.0'
+    implementationDependenciesMetadata 'com.google.android.gms:play-services-location:20.0.0'
+    ```
+    
+
+---
+
+### **🟧 ServiceActivity.kt**
+
+- **구글 맵을 띄울 액티비티 생성하고, 이 액티비티에서 구글 지도 화면을 띄울 예정이기 때문에 layout → xml 파일에 Map 프래그먼트 규격을 기본값으로 추가**한다.
+
+```xml
+<fragment
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/map_fragment"
+    android:name="com.google.android.gms.maps.SupportMapFragment"/>
+
+```
+
+### **🟧 MenuControlFragment.kt**
+
+- 이 곳에서 **‘지도’ 클릭 시 → 위의 ServiceActivity로 화면 전환 처리**를 하도록 이벤트 처리
+    
+    ```kotlin
+    //'지도' 클릭 시 지도 액티비티로 화면 전환 처리
+    binding.map.setOnClickListener{
+    //화면 전환 처리
+        val Intent = Intent(requireContext(), ServiceActivity::class.java)
+        startActivity(Intent)
+    }
+    ```
+    
+
+### **🟧 최종 모습**
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/ea61380f-ce9b-4cc4-910b-3fc5fa4e1fb4/Untitled.png)
+
+---
+
+## 🟦 현재 위치 표시하기
+
+### ▶️ 사용자 현재 위치 측정하여 화면 표시
+
+- 지도 화면이 나타날 떄, 사용자의 현재 위치를 측정하여 해당 위치로 지도를 이동시킨다.
+
+---
+
+### **🟧 1) AndroidManifest.xm에 필요한 권한 등록**
+
+```kotlin
+<uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION"/>
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+```
+
+### **🟧 2) ServiceActivity에서 위 권한을 사용자에게 요청하기**
+
+- 이 액티비티 실행 시 사용자에게 허용 궈한을 입력받기 위해 onCreate() 메소드 내부에서 권한을 요청한다.
+
+```kotlin
+//허용받을 권한 목록
+    val permission_list = arrayOf(
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.ACCESS_COARSE_LOCATION
+    )
+```
+
+```kotlin
+//권한 요청하기 사용자에게
+requestPermissions(permission_list, 0)
+```
+
+---
+
+### 🟦 **[현재 위치 측정하기]**
+
+### **🟧 1)  OnMapReadyCallback 인터페이스 구현**
+
+- 우선 지도 Fragment를 관리하는 Activity 클래스는 지도 관련 자동 호출 함수 onMapReady()메소드를 갖는 **OnMapReadyCallback 인터페이스를 구현**
+
+### **🟧 2) OnMapReady() 메소드 재정의 구현**
+
+### **🟧 3) onCreate() 내부에 앱 사태 변경되면 호출될 메소드로 OnMapReady()를 등록한다.**
+
+```
+위치 정보를 얻어오는 함수는 getLastKnownLocation( )인데 이 함수는 필요한 순간 한 번만 이용할 수 있습니다. 그러나 때로는 일정 시간 동안 반복해서 위치 정보를 얻어와야 할 때도 있습니다. 이를 위해 LocationListener를 제공합니다.
+```
+
+# **[에러 onStatusChanged() 관련 ]**
+
+```
+onStatusChanged (String provider, int status, Bundle extras) 함수는 위치 정보 제공자의 상태 변경 시 호출되며 상태 정보 값으로 OUT_OF_SERVICE, TEMPORARILY_ UNAVAILABLE, AVAILABLE의 상수 변수가 전달됩니다. onLocationChanged ( ) 함수가 위치 정보를 전달하기 위해 자동으로 호출되는 함수입니다. 이렇게 정의한 LocationListener를 LocationManager에 등록하여 위치 값을 지속해서 얻을 수 있습니다.
+```
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/4e7c3e22-819f-4a4e-a520-488d87a09d64/Untitled.png)
+
+### **🟧 ServiceActivity.kt**
+
+- 툴바에 메뉴 xml 등록하여 이벤트 처리 시 → 아이콘 클릭하면 현재 위치정보 가져와서 화면에 띄우고 마커로 지정됨
+
+```kotlin
+package com.example.appgrouppurchasemaching
+
+import android.Manifest
+import android.content.pm.PackageManager
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
+import android.os.Build
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.os.SystemClock
+import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
+import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
+import com.example.appgrouppurchasemaching.databinding.ActivityServiceBinding
+import com.google.android.gms.maps.*
+import com.google.android.gms.maps.model.*
+
+class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 제공 액티비티
+    //binding 설정
+    lateinit var binding : ActivityServiceBinding
+
+    // 허용받을 권한 목록
+    val permission_list =arrayOf(
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.ACCESS_COARSE_LOCATION
+)
+
+    lateinit var manager : LocationManager
+    lateinit var locationListener : LocationListener
+    lateinit var googleMap : GoogleMap
+    var myMarker : Marker? = null
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        //binding 처리
+        binding = ActivityServiceBinding.inflate(layoutInflater)
+        binding.mapToolbar.title= "Google Map 현재위치"
+        //툴바에 메뉴 추가
+        binding.mapToolbar.inflateMenu(R.menu.map_menu)
+
+        binding.mapToolbar.setOnMenuItemClickListener{
+when(it.itemId){
+                R.id.main_menu_location->{
+                    getMyLocation()
+                    true
+                }
+                else -> false
+            }
+}
+
+setContentView(binding.root)
+
+        //권한 요청하기 사용자에게
+        requestPermissions(permission_list, 0)
+
+        // 맵의 상태가 변경되면 호출될 메서드가 구현되어 있는 곳을 등록한다.
+        val mapFragment =supportFragmentManager.findFragmentById(R.id.map_fragment) as SupportMapFragment
+        mapFragment.getMapAsync(this)
+
+    }
+
+    // 지도가 준비가 완료되면 호출되는 메서드
+    override fun onMapReady(p0: GoogleMap) {
+        googleMap = p0
+        getMyLocation()
+    }
+
+    // 현재 위치를 측정하는 메서드
+    fun getMyLocation(){
+        // 위치 정보를 관리하는 매니저를 추출한다.
+        manager = getSystemService(LOCATION_SERVICE) as LocationManager
+
+        // 저장되어 있는 위치값이 있으면 가져온다.
+        val a1 = ActivityCompat.checkSelfPermission(this,
+            Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+val a2 = ActivityCompat.checkSelfPermission(this,
+            Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+
+if (a1 && a2) {
+            return
+        }
+        //getLastKnownLocation()
+        val location1 = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+        val location2 = manager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+
+        // 새로운 위치 측정을 요청
+        locationListener =LocationListener{
+setUserLocation(it)
+}
+
+if(location1 != null){
+            setUserLocation(location1)
+        } else if(location2 != null){
+            setUserLocation(location2)
+        }
+
+        if(manager.isProviderEnabled(LocationManager.GPS_PROVIDER) == true){
+            manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
+                0f, locationListener)
+        } else if(manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) == true){
+            manager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0,
+                0f, locationListener)
+        }
+    }
+
+    // 위치 값을 받아 지도를 이동시킨다.
+    fun setUserLocation(location:Location){
+        // 위치 측정을 중단한다.
+        manager.removeUpdates(locationListener)
+
+        // 위도와 경도값을 관리하는 객체
+        val loc1 = LatLng(location.latitude, location.longitude)
+        // 지도를 이동시키기 위한 객체를 생성한다.
+        val loc2 = CameraUpdateFactory.newLatLngZoom(loc1, 15f)
+        // 이동한다.
+        googleMap.animateCamera(loc2)
+
+        // marker가 표시가 되어 있다면..
+        if(myMarker != null){
+            myMarker?.remove()
+        }
+
+        // 현재 위치에 마커를 표시한다.
+        val myMarkerOptions = MarkerOptions()
+        myMarkerOptions.position(loc1)
+
+        myMarkerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.my_location))
+
+        myMarker = googleMap.addMarker(myMarkerOptions)
+    }
+
+}
+```
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/7c209bfa-035c-4d8d-a08a-d53d13e52e56/Untitled.png)
+
+---
+
+## 🟦 구글 지도 옵션 설정하기
+
+### ▶️ 구글 지도 옵션 설정
+
+- 화면에 표시한 구글 지도에 다양한 옵션을 설정해 기능을 활성화 할 수 있다.
+
+### **🟧 [사전 설정] 권한 확인**
+
+- **일부 옵션은 ACCESS_FINE_LOCATION과 ACCESS_COARSE_LOCATION 권한 확인이 필요**하다.
+- 따라서 **해당 권한 확인 코드를 넣어준다.**
+- 이 모든 옵션들은 **모두 지도 준비 완료되면 자동 호출되는 재정의 메소드 onMapReady() 내부에서 작성**한다.
+
+```kotlin
+// 지도가 준비가 완료되면 호출되는 메서드
+    override fun onMapReady(p0: GoogleMap) {
+        googleMap = p0
+
+        //구글 지도의 일부 옵션 설정을 위해 권환 확인 코드 추가한다.
+        val a1 = Manifest.permission.ACCESS_FINE_LOCATION
+        val a2 = Manifest.permission.ACCESS_COARSE_LOCATION
+
+        if(ActivityCompat.checkSelfPermission(this, a1) == PackageManager.PERMISSION_GRANTED
+            && ActivityCompat.checkSelfPermission(this, a2) == PackageManager.PERMISSION_GRANTED){
+        }
+        
+        getMyLocation() //현재 위치 측정 메소드 호출 
+    }
+```
+
+### **🟧 옵션 1) 지도 화면 상에 ‘확대/축소’ 버튼 추가**
+
+```kotlin
+if(ActivityCompat.checkSelfPermission(this, a1) == PackageManager.PERMISSION_GRANTED
+&& ActivityCompat.checkSelfPermission(this, a2) == PackageManager.PERMISSION_GRANTED){
+
+    //확대 축소 버튼
+    googleMap.uiSettings.isZoomControlsEnabled= true
+}
+```
+
+### **🟧 옵션 2) 현재 위치 표시하기**
+
+- 현재 위치 표시 기능을 제공하는 옵션
+- 마커 표시하면 중복되어 나타나므로 둘 중 하나만 사용한다.
+- 이때, 지도 상에 현재 위치로 이동할 수 있는 버튼이 나타난다.
+
+```kotlin
+//구글 제공 - 현재 위치 표시
+googleMap.isMyLocationEnabled= true
+
+//현재 위치 표시 마커 중복 시, 제거 O
+googleMap.uiSettings.isMyLocationButtonEnabled = false
+```
+
+### **🟧 옵션 3) 구글 지도 타입 설정**
+
+- 구글 지도 타입을 설정할 수 있다.
+- 기본적으로 **MAP_TYPE_NORMAL로 설정**되어 있다.
+
+```kotlin
+googleMap.mapType = GoogleMap.MAP_TYPE_NONE
+googleMap.mapType = GoogleMap.MAP_TYPE_NORMAL (기본값)
+googleMap.mapType = GoogleMap.MAP_TYPE_TERRAIN
+googleMap.mapType = GoogleMap.MAP_TYPE_SATELLITE
+googleMap.mapType = GoogleMap.MAP_TYPE_HYBRID
+```
+
+---
