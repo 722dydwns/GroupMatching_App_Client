@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ServiceActivity">
+    tools:context=".service.ServiceActivity">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/map_toolbar"
@@ -19,6 +19,13 @@
         android:id="@+id/map_fragment"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
-        android:layout_height="675dp" />
+        android:layout_height="550dp" />
+
+    <Button
+        android:id="@+id/promise_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_radius_grin"
+        android:text="약속잡기 " />
 
 </LinearLayout>

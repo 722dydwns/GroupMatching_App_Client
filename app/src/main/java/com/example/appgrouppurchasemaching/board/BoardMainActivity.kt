@@ -37,8 +37,11 @@ class BoardMainActivity : AppCompatActivity() { //게시판 메인 액티비티
     @RequiresApi(Build.VERSION_CODES.Q)
     val permissionList = arrayOf(
         Manifest.permission.READ_EXTERNAL_STORAGE,
-        Manifest.permission.ACCESS_MEDIA_LOCATION
+        Manifest.permission.ACCESS_MEDIA_LOCATION,
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.ACCESS_COARSE_LOCATION
     )
+
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,7 +84,6 @@ class BoardMainActivity : AppCompatActivity() { //게시판 메인 액티비티
         }
 
         //초기 화면 프래그먼트 설정
-        //fragmentController("board_main", false,false)
         fragmentController("board_main", false, false)
     }
 

@@ -6,9 +6,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.appgrouppurchasemaching.ServiceActivity
+import com.example.appgrouppurchasemaching.service.ServiceActivity
 import com.example.appgrouppurchasemaching.databinding.FragmentMenuControlBinding
-import com.example.appgrouppurchasemaching.intro.MainActivity
 
 class MenuControlFragment : Fragment() { //메뉴 컨트롤할 프래그먼트
 
