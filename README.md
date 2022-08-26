@@ -3920,3 +3920,305 @@ googleMap.mapType = GoogleMap.MAP_TYPE_HYBRID
 ```
 
 ---
+## 🟦 위치 측정 서비스 구현
+
+### 📌 이 서비스 사용하지 않아도 되는 경우
+
+- 1) 사용자의 현재 위치를 **‘일시적으로 측정’**해서 사용하는 경우
+    - cf. ***지속적으로 사용자의 위치를 측정해야 할 경우에는 위치 측정 서비스가 필요***하다.
+    
+    2) **서비스로 운영하지 않았을 때, 애프리케이션이 일시 정지하면 위치 측정이 중단**된다. 
+    
+    3) 따라서 ‘**서비스’로 운영하는 방법**을 살펴볼 것이다. 
+    
+    - Activity에서도 현재 위치를 사용해야 하므로 IPC를 활용한다.
+    
+    ---
+    
+
+### **🟧 1) AndroidManifest.xml에 권한 추가하기**
+
+- **포그라운드 서비스의 사용을 위해 권한 추가**
+
+```kotlin
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+```
+
+### **🟧 MyLocationService.kt**
+
+- 별도의 서비스 생성하여 **백그라운드(액티비티 종료해도)에서도 지속적으로 위치 측정 되도록 설정.**
+
+```kotlin
+package com.example.appgrouppurchasemaching.service
+
+import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.Service
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
+import android.os.Binder
+import android.os.Build
+import android.os.IBinder
+import android.util.Log
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+
+class MyLocationService : Service() {
+
+    lateinit var manager : LocationManager
+    lateinit var locationListener: LocationListener
+
+    override fun onBind(intent: Intent): IBinder {
+TODO("Return the communication channel to the service.")
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+
+        if(Build.VERSION.SDK_INT>= Build.VERSION_CODES.O) {
+            val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            val channel = NotificationChannel("myLocationService", "myLocationService",
+                                                NotificationManager.IMPORTANCE_HIGH)
+            //알림 띄우기
+            manager.createNotificationChannel(channel)
+            val builder = NotificationCompat.Builder(this, "myLocationService")
+            builder.setSmallIcon(android.R.drawable.ic_menu_mylocation)
+            builder.setContentTitle("현재 위치 측정")
+            builder.setContentText("현재 위치를 측정 중 입니다.")
+            val notifiaction = builder.build()
+            startForeground(10, notifiaction)
+        }
+
+        //위치 측정
+        manager = getSystemService(LOCATION_SERVICE) as LocationManager
+
+        val a1 = Manifest.permission.ACCESS_FINE_LOCATION
+val a2 = Manifest.permission.ACCESS_COARSE_LOCATION
+
+if(ActivityCompat.checkSelfPermission(this, a1) == PackageManager.PERMISSION_DENIED
+|| ActivityCompat.checkSelfPermission(this, a2) == PackageManager.PERMISSION_DENIED) {
+
+            return super.onStartCommand(intent, flags, startId)
+        }
+
+        val location1 = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+        val location2 = manager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+
+        locationListener =LocationListener{
+getUserLocation(it) // 사용자 위치 정보 가져옴
+}
+
+if(location1 != null) {
+            getUserLocation(location1)
+        }else if(location2 != null) {
+            getUserLocation(location2)
+        }
+
+        if(manager.isProviderEnabled(LocationManager.GPS_PROVIDER) == true) {
+            manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0f, locationListener)
+        }
+        if(manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) == true) {
+            manager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0f, locationListener)
+        }
+
+        return super.onStartCommand(intent, flags, startId)
+    }
+
+    //사용자 위치 추적 메소드
+    fun getUserLocation(location : Location){
+        Log.d("test", "${location.longitude}, ${location.latitude}")
+    }
+
+    //이 서비스 중단될 경우 자동 호출
+    override fun onDestroy() {
+        super.onDestroy()
+        manager.removeUpdates(locationListener)
+    }
+}
+```
+
+## 🟦 구글 지도에 적용하기
+
+### ▶️ 구글 지도에 적용하기
+
+- ACtivity가 Service에서 측정한 위치 정보를 받아와 지도에 적용하는 작업 수행
+
+---
+
+### **📌 IPC [Inter-Process Communication]**
+
+- 프로세스 사이의 데이터 통신은 IPC를 매개로 한다.
+- 프로세스 간 통신
+
+---
+
+### **🟧 ServiceActivity.kt**
+
+- 이 곳에서 **MyLocationService 접속 정보 세팅해서 해당 서비스에 접속**한다.
+
+```kotlin
+package com.example.appgrouppurchasemaching.service
+
+import android.Manifest
+import android.app.ActivityManager
+import android.content.ComponentName
+import android.content.Intent
+import android.content.ServiceConnection
+import android.content.pm.PackageManager
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
+import android.os.Build
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.os.IBinder
+import android.os.SystemClock
+import androidx.core.app.ActivityCompat
+import com.example.appgrouppurchasemaching.R
+import com.example.appgrouppurchasemaching.databinding.ActivityServiceBinding
+import com.google.android.gms.maps.*
+import com.google.android.gms.maps.model.*
+import kotlin.concurrent.thread
+
+class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 제공 액티비티
+    //binding 설정
+    lateinit var binding: ActivityServiceBinding
+
+    lateinit var manager: LocationManager
+    lateinit var locationListener: LocationListener
+    lateinit var googleMap: GoogleMap
+    var myMarker: Marker? = null
+
+    //서비스 intent 변수
+    lateinit var serviceIntent: Intent
+
+    //IPC 사용
+    var ipcService: MyLocationService? = null
+    var serviceRunning = false //현재 서비스 실행 중 여부 변수
+    var myLocation : Location? = null
+
+    //서비스 접속 관리 객체
+    val connection = object : ServiceConnection {
+        //서비스 접속 시
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            //사용할 서비스 추출한다.
+            val binder = service as MyLocationService.MyLocationServiceBinder
+            ipcService = binder.getService() //변수에 담아주고
+        }
+
+        //서비스 접속 해제 시
+        override fun onServiceDisconnected(name: ComponentName?) {
+            ipcService = null
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        //binding 처리
+        binding = ActivityServiceBinding.inflate(layoutInflater)
+        binding.mapToolbar.title= "Google Map 현재 위치 확인"
+
+        setContentView(binding.root)
+
+        // 맵의 상태가 변경되면 호출될 메서드가 구현되어 있는 곳을 등록한다.
+        val mapFragment =
+supportFragmentManager.findFragmentById(R.id.map_fragment) as SupportMapFragment
+        mapFragment.getMapAsync(this)
+
+        //서비스 가동 중 아닌 경우를 확인한 뒤 ->  서비스 가동시킨다.
+        val chk = isServiceRunning("com.example.appgrouppurchasemaching.MyLocationService")
+        serviceIntent = Intent(this, MyLocationService::class.java)
+
+        if (chk == false) { //접속 X
+            if (Build.VERSION.SDK_INT>= Build.VERSION_CODES.O) {
+                startForegroundService(serviceIntent) //백그라운드에서 실행
+            } else { //접속 O
+                startService(serviceIntent) //서비스가 실행
+            }
+        }
+
+        //서비스에 접속한다.
+        bindService(serviceIntent, connection,BIND_AUTO_CREATE)
+
+    }
+
+    // 지도가 준비가 완료되면 호출되는 메서드
+    override fun onMapReady(p0: GoogleMap) {
+        googleMap = p0
+
+        // 구글 지도의 옵션 설정을 위해 권한을 확인한다.
+        val a1 = Manifest.permission.ACCESS_FINE_LOCATION
+val a2 = Manifest.permission.ACCESS_COARSE_LOCATION
+
+if (ActivityCompat.checkSelfPermission(this, a1) == PackageManager.PERMISSION_GRANTED
+&& ActivityCompat.checkSelfPermission(this, a2) == PackageManager.PERMISSION_GRANTED
+) {
+
+            // 확대 축소 버튼
+            googleMap.uiSettings.isZoomControlsEnabled= true
+
+            // 현재 위치를 표시한다.
+            googleMap.isMyLocationEnabled= true
+
+        }
+
+        //서비스에서 현 위치값을 가져오는 쓰레드 가동시키기
+        serviceRunning = true
+
+thread{
+while (serviceRunning) {
+                SystemClock.sleep(1000) //1초마다
+                myLocation = ipcService?.returnUserLocation()
+
+                runOnUiThread{
+if (myLocation != null) {
+                        setUserLocation(myLocation!!, true)
+                        serviceRunning = false
+                    }
+						}
+			}
+		}
+	}
+    fun setUserLocation(location:Location, zoom : Boolean){
+
+        // 위도와 경도값을 관리하는 객체
+        val loc1 = LatLng(location.latitude, location.longitude)
+        if(zoom == true) {
+            // 지도를 이동시키기 위한 객체를 생성한다.
+            val loc2 = CameraUpdateFactory.newLatLngZoom(loc1, 15f)
+            // 이동한다.
+            googleMap.animateCamera(loc2)
+        } else {
+            val loc2 = CameraUpdateFactory.newLatLng(loc1)
+            googleMap.animateCamera(loc2)
+        }
+    }
+
+    //서비스 가동 여부 확인 메소드
+    fun isServiceRunning(name : String) : Boolean {
+        val manager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
+        //현재 실행 중인 서비스를 가져온다.
+        val serviceList = manager.getRunningServices(Int.MAX_VALUE)
+
+        for(serviceInfo in serviceList) {
+            //서비스의 이름이 원하는 이름인지 확인
+            if(serviceInfo.service.className== name) {
+                return true
+            }
+       }
+        return false
+    }
+
+    //액티비티 종료 시 서비스 종료시킴
+    override fun onDestroy() {
+        super.onDestroy()
+        unbindService(connection) //서비스 접속 해제시킴
+        stopService(serviceIntent)
+    }
+}
+```
+
+---
