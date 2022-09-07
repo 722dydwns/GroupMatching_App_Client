@@ -90,22 +90,22 @@
 
                     <ImageView
                         android:id="@+id/category10"
-                        android:layout_width="120dp"
-                        android:layout_height="120dp"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
                         android:layout_weight="1"
                         android:src="@drawable/main_icon_code" />
 
                     <ImageView
                         android:id="@+id/category5"
-                        android:layout_width="120dp"
-                        android:layout_height="120dp"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
                         android:layout_weight="1"
                         android:src="@drawable/main_icon_promise" />
 
                     <ImageView
                         android:id="@+id/map"
-                        android:layout_width="120dp"
-                        android:layout_height="120dp"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
                         android:layout_weight="1"
                         android:src="@drawable/main_icon_map" />
                 </LinearLayout>
@@ -113,7 +113,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="결제 바로가기"
+                    android:text="앱 설정/회원 정보/이벤트"
                     android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
                 <LinearLayout
@@ -121,25 +121,25 @@
                     android:layout_height="150dp">
 
                     <ImageView
-                        android:id="@+id/category7"
-                        android:layout_width="120dp"
-                        android:layout_height="120dp"
+                        android:id="@+id/app_service"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
                         android:layout_weight="1"
-                        android:src="@drawable/main_icon_clothes" />
+                        android:src="@drawable/app_service" />
 
                     <ImageView
-                        android:id="@+id/category8"
-                        android:layout_width="120dp"
-                        android:layout_height="120dp"
+                        android:id="@+id/service_person"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
                         android:layout_weight="1"
-                        android:src="@drawable/main_icon_pay" />
+                        android:src="@drawable/service_person" />
 
                     <ImageView
-                        android:id="@+id/category9"
-                        android:layout_width="120dp"
-                        android:layout_height="120dp"
+                        android:id="@+id/service_event"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
                         android:layout_weight="1"
-                        android:src="@drawable/main_icon_likes" />
+                        android:src="@drawable/service_event" />
                 </LinearLayout>
 
             </LinearLayout>
