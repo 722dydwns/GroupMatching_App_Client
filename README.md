@@ -4220,5 +4220,122 @@ if (myLocation != null) {
     }
 }
 ```
+## 🟦 주변 정보 가져오기
 
+### ▶️ ‘현재 위치값’을 기준으로 주변 정보 가져오기
+
+- 이 부분은 **구글에서 제공하는 Place API를 사용**한다.
+
+---
+
+### **🟧 Place API 사용 설정**
+
+- 개발자 콘솔에 접속해서 사용을 설정한다.
+    
+    ![api.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/62f98eb0-3f6b-4423-946b-cb4b43af2544/api.png)
+    
+
+```kotlin
+https://maps.googleapis.com/maps/api/place/nearbysearch/json? //URL
+location=위도,경도
+&radius=크기
+&type=뽑을위치타입
+&key=구글발급키
+&language=ko //한국어 
+```
+
+---
+
+## 🟦 주변 정보 다이얼로그 구성
+
+### ▶️ 주변 장소 정보 선택하는 다이얼로그 구성
+
+- **지도에 표시하고자 하는 장소의 종류를 선택할 수있는 다이얼로그를 구성**한다.
+
+---
+
+### **🟧 1) 다이얼로그 목록 부분 구성 데이터 arrayOf() 생성**
+
+- 우선 placeApi 제공하는 장소 정보 활용 가능할 데이터 목록을 모두 arrayOf로 구성
+
+```kotlin
+// -> 다이얼로그 띄울 목록 arrayOf() 생성
+    val dialogData = arrayOf(
+        "accounting", "airport", "amusement_park",
+        "aquarium", "art_gallery", "atm", "bakery",
+        "bank", "bar", "beauty_salon", "bicycle_store",
+        "book_store", "bowling_alley", "bus_station",
+        "cafe", "campground", "car_dealer", "car_rental",
+        "car_repair", "car_wash", "casino", "cemetery",
+        "church", "city_hall", "clothing_store", "convenience_store",
+        "courthouse", "dentist", "department_store", "doctor",
+        "drugstore", "electrician", "electronics_store", "embassy",
+        "fire_station", "florist", "funeral_home", "furniture_store",
+        "gas_station", "gym", "hair_care", "hardware_store", "hindu_temple",
+        "home_goods_store", "hospital", "insurance_agency",
+        "jewelry_store", "laundry", "lawyer", "library", "light_rail_station",
+        "liquor_store", "local_government_office", "locksmith", "lodging",
+        "meal_delivery", "meal_takeaway", "mosque", "movie_rental", "movie_theater",
+        "moving_company", "museum", "night_club", "painter", "park", "parking",
+        "pet_store", "pharmacy", "physiotherapist", "plumber", "police", "post_office",
+        "primary_school", "real_estate_agency", "restaurant", "roofing_contractor",
+        "rv_park", "school", "secondary_school", "shoe_store", "shopping_mall",
+        "spa", "stadium", "storage", "store", "subway_station", "supermarket",
+        "synagogue", "taxi_stand", "tourist_attraction", "train_station",
+        "transit_station", "travel_agency", "university", "eterinary_care","zoo"
+    )
+```
+
+### **🟧 2) 뷰의 상단 메뉴툴바에 장소 선택 다이얼로그 (목록) 띄울 예정.**
+
+- (1) map_menu.xml 생성해서 아이콘과 id값 지정
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/main_menu_place"
+        android:icon="@android:drawable/ic_menu_myplaces"
+        android:title="주변정보"
+        app:showAsAction="always" />
+</menu>
+```
+
+- (2) ServiceActivity.kt의 onCreate() 내부에서 **mapToolbar에 inflateMenu()로 위에서 생성한 다이얼로그 menu.xml 메뉴 연결**
+- (3) ServiceActivity.kt의 onCreate() 내부에서 **mapToolbar에 연결해놓은 메뉴 클릭 이벤트 처리**한다.
+    - → 이 목록 다이얼로그 클릭 시, arraOf()로 생성해준 **목록 구성 데이터들이 화면에 띄워진다.**
+    - → **사용자가 선택한 장소 목록에 대한 표시를 할 예정**이다.
+
+```kotlin
+
+binding.mapToolbar.inflateMenu(R.menu.map_menu)
+binding.mapToolbar.setOnMenuItemClickListener{
+when(it.itemId) {
+        R.id.main_menu_place->{
+                val placeListBuilder = AlertDialog.Builder(this)
+                placeListBuilder.setTitle("장소 종류 선택")
+                placeListBuilder.setNegativeButton("취소", null)
+                placeListBuilder.setNeutralButton("초기화", null)//초기화 버튼
+                //다이얼로그 목록 세팅해주고
+                placeListBuilder.setItems(dialogData, null)
+                //띄우기기
+                placeListBuilder.show()
+            true
+        }
+        else -> false
+    }
+}
+```
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/19ac4146-5f56-4304-b874-5fead122f3bb/Untitled.png)
+
+---
+
+## 🟦 주변 정보 적용하기
+
+### ▶️ 선택한 장소 정보 Marker 표시
+
+- Place API 정보를 읽어와서 주변에 Marker를 표시한다.
 ---
