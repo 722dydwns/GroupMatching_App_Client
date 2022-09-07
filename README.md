@@ -4232,7 +4232,7 @@ if (myLocation != null) {
 
 - 개발자 콘솔에 접속해서 사용을 설정한다.
     
-    ![api.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/62f98eb0-3f6b-4423-946b-cb4b43af2544/api.png)
+<img width="437" alt="api" src="https://user-images.githubusercontent.com/39732720/188790851-d32a524f-d4c2-4765-80d0-68e74b7a05f9.png">
     
 
 ```kotlin
