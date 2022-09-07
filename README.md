@@ -4329,7 +4329,7 @@ when(it.itemId) {
 }
 ```
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/19ac4146-5f56-4304-b874-5fead122f3bb/Untitled.png)
+<img width="398" alt="다이얼로그 목록 구성 화면" src="https://user-images.githubusercontent.com/39732720/188790954-e7964963-bd3a-41a9-b179-951501652265.png">
 
 ---
 
