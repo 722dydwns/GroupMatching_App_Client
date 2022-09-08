@@ -4365,11 +4365,11 @@ when(it.itemId) {
     - **Place API에서 가져올 데이터 종류**
         - JSON 데이터 내부에서 geometry 의 위도 경도값/ name값/주소값
     
-    ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/698cad8f-6417-4a08-a07a-ef657a0ec7f6/Untitled.png)
+    <img width="524" alt="json 데이터 내용" src="https://user-images.githubusercontent.com/39732720/189022944-8027626c-7f65-4c05-bc7f-fdca6275d4ec.png">
     
     - 데이터는 (**status == OK) 일 때만 가져옴**
     
-    ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/020d60ef-d2d4-468c-b93b-5fdba695eb12/Untitled.png)
+    <img width="329" alt="status" src="https://user-images.githubusercontent.com/39732720/189022957-1be713b1-c1cf-43bf-8d17-540f23e9a579.png">
     
     - **fun getNearbyPlaceData(type:String) 내부 구성**
         - 1) 네트워크 접속해서 API 주소에서 데이터 읽어온다.
