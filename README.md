@@ -4477,9 +4477,9 @@ when(it.itemId) {
     }
     ```
     
+<img width="562" alt="결과1" src="https://user-images.githubusercontent.com/39732720/189023108-c7cfbc7b-f2be-48ad-98c3-5be072c3c81d.png">
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/d67dd6fc-5058-4dfa-917c-1071d1ae9365/Untitled.png)
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/0a43aecd-7cfd-4c57-83c5-de4c02e770de/Untitled.png)
+<img width="292" alt="결과2" src="https://user-images.githubusercontent.com/39732720/189023128-277c2915-622a-41c0-a06c-3cb3e335f45b.png">
 
 ---
