@@ -4333,9 +4333,153 @@ when(it.itemId) {
 
 ---
 
-## 🟦 주변 정보 적용하기
+## 🟦 Place API 읽어와서 주변 정보 적용하기
 
 ### ▶️ 선택한 장소 정보 Marker 표시
 
 - Place API 정보를 읽어와서 주변에 Marker를 표시한다.
+
+---
+
+### **🟧 1) getNearbyPlaceData(type:String) 함수 생성**
+
+- ServiceActivity.kt 내부에 함수를 생성한다.
+- 이 함수는 T**oolBar의 우측 상단 메뉴 클릭 시 다이얼로그 클릭 이벤트 발생할 때 호출할 용도**이다.
+    - → 사용자가 클릭한 다이얼로그 리스트 속 idx 값을 인수로 보낸다.
+    
+    ```kotlin
+    binding.mapToolbar.setOnMenuItemClickListener{
+    when(it.itemId) {
+            R.id.main_menu_place->{
+    											. . . 
+    				}
+    								//다이얼로그 목록 세팅해주고
+                    placeListBuilder.setItems(dialogData){dialogInterface, i->
+    								//데이터 리스트들 초기화
+    												. . .
+    										// -> 여기서 호출함				
+                        getNearbyPlaceData(dialogData[i]) //i번째 데이터 넘겨줌
+    
+    ```
+    
+    - **Place API에서 가져올 데이터 종류**
+        - JSON 데이터 내부에서 geometry 의 위도 경도값/ name값/주소값
+    
+    ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/698cad8f-6417-4a08-a07a-ef657a0ec7f6/Untitled.png)
+    
+    - 데이터는 (**status == OK) 일 때만 가져옴**
+    
+    ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/020d60ef-d2d4-468c-b93b-5fdba695eb12/Untitled.png)
+    
+    - **fun getNearbyPlaceData(type:String) 내부 구성**
+        - 1) 네트워크 접속해서 API 주소에서 데이터 읽어온다.
+        - 2) 읽어온 데이터를 다시 String 버퍼로 받아두고
+        - 3) JSON 객체 생성해서 받은 데이터를 추출해서 로컬 변수 리스트에 담아둔다.
+        - 4) runOnUiThread로 받은 데이터를 화면에 처리 (마커 객체)
+    
+    ```kotlin
+    // ->장소 선택 각 항목 터치 시, API에서 관련 데이터 가져오는 함수
+    fun getNearbyPlaceData(type: String) { //매개변수로 받은(사용자 선택idx 데이터)
+    		
+    		 //네트워크와 데이터 처리할 땐 thread 필수
+    		thread{
+    		//요청할 API site 주소
+    		        var site = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?"
+    		        site += "location=${myLocation?.latitude},${myLocation?.longitude}"
+    		        site += "&radius=1000&type=${type}"
+    		        site += "&key=AIzaSyCWxie_s84vOaG1VMT5dRgndafpXe1Ntw8&language=ko"
+    		
+    		        //Log 찍어보기
+    		        //Log.d("test", site)
+    		
+    		        //API 주소에서 데이터 가져오기
+    		        val url = URL(site)
+    		        val conn = url.openConnection() as HttpURLConnection
+    		
+    		        //데이터 읽어온다.
+    		        val isr = InputStreamReader(conn.inputStream, "UTF-8")
+    		        val br = BufferedReader(isr)
+    		
+    		        var str:String? = null
+    		        val buf = StringBuffer()
+    		
+    		        //반복문 돌면서 데이터 읽어들이기
+    		        do{
+    		            str = br.readLine()
+    		            if(str != null) {
+    		                buf.append(str)
+    		            }
+    		        }while (str != null)
+    		
+    		        val data = buf.toString()
+    		        //Log.d("test", data)
+    		
+    		        //JSON 객체 생성
+    		        val root = JSONObject(data)
+    		        if(root.getString("status") == "OK") {
+    		            val results = root.getJSONArray("results")
+    		            for(i in 0 until results.length()) {
+    		                val results_item = results.getJSONObject(i)
+    		                val geometry = results_item.getJSONObject("geometry")
+    		
+    		                val location = geometry.getJSONObject("location")
+    		                val lat = location.getDouble("lat")
+    		                val lng = location.getDouble("lng")
+    		                val name = results_item.getString("name")
+    		                val vicinity = results_item.getString("vicinity")
+    		
+    		                //Log.d("test", "${lat}")
+    		                //Log.d("test", "${lng}")
+    		                //Log.d("test", "${name}")
+    		                //Log.d("test", "${vicinity}")
+    		                //Log.d("test", "------------------")
+    		
+    		                //로컬 변수 리스트에 받은 데이터들 다시 담기
+    		                nearby_lat.add(lat)
+    		                nearby_lng.add(lng)
+    		                nearby_name.add(name)
+    		                nearby_vicinity.add(vicinity)
+    		
+    		                //화면 처리
+    		                runOnUiThread{
+    												for(i in 0untilnearby_lat.size) {
+    		                        val loc = LatLng(nearby_lat[i], nearby_lng[i])
+    		
+    		                        var placeMarkerOptions = MarkerOptions()
+    		                        placeMarkerOptions.position(loc)
+    		                        placeMarkerOptions.title(nearby_name[i])
+    		                        placeMarkerOptions.snippet(nearby_vicinity[i])
+    		
+    		                        val placeMarker = googleMap.addMarker(placeMarkerOptions)
+    		                        nearby_marker_list.add(placeMarker!!)
+    		                    }
+    							}		
+    		}
+    }
+    ```
+    
+    - **다이얼로그 속 ‘초기화’ 버튼 클릭 시 이벤트 처리**
+    - → 이전 마커 모두 clear 처리
+    
+    ```kotlin
+    placeListBuilder.setNeutralButton("초기화"){dialogInterface, i->
+    //데이터 리스트들 초기화
+        nearby_lat.clear()
+        nearby_lng.clear()
+        nearby_name.clear()
+        nearby_vicinity.clear()
+    
+        for(m in nearby_marker_list){ //마커도 for문 돌며 차례로 제거
+            m.remove()
+        }
+        nearby_marker_list.clear()
+    
+    }
+    ```
+    
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/d67dd6fc-5058-4dfa-917c-1071d1ae9365/Untitled.png)
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/0a43aecd-7cfd-4c57-83c5-de4c02e770de/Untitled.png)
+
 ---
