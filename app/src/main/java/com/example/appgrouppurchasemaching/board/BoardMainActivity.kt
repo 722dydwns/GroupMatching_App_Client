@@ -54,8 +54,8 @@ class BoardMainActivity : AppCompatActivity() { //게시판 메인 액티비티
         //권한 요청 - 자동 콜백함수
         requestPermissions(permissionList, 0)
 
-        //전체 게시판(모두 포함하는) 추가가
-        boardNameList.add("전체 게시판")
+        //전체 게시판(모두 포함하는) 추가
+        boardNameList.add("ALL 공동구매")
         boardIndexList.add(0)
 
         //서버와 통신
