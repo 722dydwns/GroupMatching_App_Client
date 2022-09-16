@@ -271,8 +271,9 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
             //요청할 API site 주소
             var site = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
             site += "?location=${myLocation?.latitude},${myLocation?.longitude}"
-            site += "&radius=1000&type=${type}"
-            site += "&key=AIzaSyAxlXAC_wKh7N8th-s6ewua3JKpwp6Lkzk&language=ko"
+            site += "&radius=5000&type=${type}"
+            site += "&key=AIzaSyB7jqeJDg21reY8e60ycR-qVGtMfuVn-ZU&language=ko"
+
 
             //Log 찍어보기
             //Log.d("test", site)

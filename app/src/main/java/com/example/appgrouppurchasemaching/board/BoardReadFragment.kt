@@ -38,7 +38,7 @@ class BoardReadFragment : Fragment() { //게시글 읽기 프래그먼트 화면
         //바인딩
         binding = FragmentBoardReadBinding.inflate(inflater)
         //title
-        binding.boardReadToolbar.title = "게시글 읽기"
+        binding.boardReadToolbar.title = "공구 매칭 읽기"
 
         //Back 버튼을 툴바 상단의 navigationIcon으로 추가한다.
         val navIcon = requireContext().getDrawable(androidx.appcompat.R.drawable.abc_ic_ab_back_material)

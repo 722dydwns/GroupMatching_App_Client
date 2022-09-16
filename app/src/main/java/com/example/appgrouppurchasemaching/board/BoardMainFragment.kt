@@ -1,6 +1,7 @@
 package com.example.appgrouppurchasemaching.board
 
 import android.content.DialogInterface
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -19,6 +20,7 @@ import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONArray
+import java.net.URL
 import kotlin.concurrent.thread
 
 class BoardMainFragment : Fragment() { //게시판 목록 메인 프래그먼트
@@ -145,6 +147,7 @@ class BoardMainFragment : Fragment() { //게시판 목록 메인 프래그먼트
             holder.boardMainItemNickname.text = contentWriterList[position]
             holder.boardMainItemSubject.text = contentSubjectList[position]
             holder.boardMainItemWriteDate.text = contentWriteDateList[position]
+
         }
         //3) 재정의 : getITemCount() 항목 개수 판단을 위해 '자동 호출'됨
         override fun getItemCount(): Int {
@@ -205,7 +208,7 @@ class BoardMainFragment : Fragment() { //게시판 목록 메인 프래그먼트
             if(response.isSuccessful == true)  { //통신 성공 시
                 val resultText = response.body?.string()!!.trim()
                 val root = JSONArray(resultText) //Array 에 담아준 뒤
-                //for문 돌면서 각 JSON 객체의 데이터를 옮김김
+                //for문 돌면서 각 JSON 객체의 데이터를 옮김
 
                 for(i in 0 until root.length()) {
                     val obj = root.getJSONObject(i)
@@ -214,6 +217,7 @@ class BoardMainFragment : Fragment() { //게시판 목록 메인 프래그먼트
                     contentWriterList.add(obj.getString("content_nick_name"))
                     contentWriteDateList.add(obj.getString("content_write_date"))
                     contentSubjectList.add(obj.getString("content_subject"))
+
                 }
 
                 //만약 가져온 것이 하나도 없다면, 존재X 인 페이지이므로 마지막 페이지를 하나 빼준다.

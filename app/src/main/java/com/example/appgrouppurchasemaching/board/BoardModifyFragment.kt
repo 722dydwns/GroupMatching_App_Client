@@ -56,7 +56,7 @@ class BoardModifyFragment : Fragment() { //게시글 수정 프래그먼트
         //바인딩
         binding = FragmentBoardModifyBinding.inflate(inflater)
         //title
-        binding.boardModifyToolbar.title = "게시글 수정"
+        binding.boardModifyToolbar.title = "공구 매칭 수정"
         //메뉴 xml 지정
         binding.boardModifyToolbar.inflateMenu(R.menu.board_modify_menu)
         //각 메뉴 항목 이벤트 처리

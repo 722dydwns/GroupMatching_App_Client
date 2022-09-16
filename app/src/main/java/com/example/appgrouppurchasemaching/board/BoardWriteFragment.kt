@@ -58,7 +58,7 @@ class BoardWriteFragment : Fragment() {//글쓰기 프래그먼트 화면
 
         //바인딩
         binding = FragmentBoardWriteBinding.inflate(inflater)
-        binding.boardWriteToolbar.title = "게시글 작성"
+        binding.boardWriteToolbar.title = "공구 매칭 쓰기"
 
         //Back 버튼을 툴바 상단의 navigationIcon으로 추가한다.
         val navIcon =
