@@ -16,7 +16,7 @@ import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 
-class MyLocationService : Service() {
+class MyLocationService : Service() { // 위치 서비스
 
     lateinit var manager : LocationManager
     lateinit var locationListener: LocationListener

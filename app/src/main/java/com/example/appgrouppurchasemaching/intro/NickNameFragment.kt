@@ -22,7 +22,6 @@ class NickNameFragment : Fragment() { //닉네임 화면
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
     }
 
     override fun onCreateView(

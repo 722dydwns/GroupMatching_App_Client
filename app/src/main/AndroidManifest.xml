@@ -17,10 +17,21 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppGroupPurchaseMaching"
         android:usesCleartextTraffic="true">
+        <activity
+            android:name=".intro.SplashActivity"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+        </activity>
+
         <service
             android:name=".service.MyLocationService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
 
         <activity
             android:name=".service.ServiceActivity"
@@ -28,7 +39,7 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyCWxie_s84vOaG1VMT5dRgndafpXe1Ntw8" />
+            android:value="AIzaSyAxlXAC_wKh7N8th-s6ewua3JKpwp6Lkzk" />
 
         <activity
             android:name=".board.BoardMainActivity"
@@ -36,12 +47,7 @@
         <activity
             android:name=".intro.IntroActivity"
             android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            />
         </activity>
 
         <provider

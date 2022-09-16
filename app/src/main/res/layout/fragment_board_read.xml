@@ -16,13 +16,13 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="554dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="10dp" >
+            android:padding="10dp">
 
             <TextView
                 android:id="@+id/board_read_subject"
@@ -55,6 +55,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="10dp" />
 
+            <ImageView
+                android:id="@+id/board_read_image"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/image_icon" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="10dp" />
+
             <TextView
                 android:id="@+id/board_read_text"
                 android:layout_width="match_parent"
@@ -66,12 +76,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="10dp" />
 
-            <ImageView
-                android:id="@+id/board_read_image"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:src="@drawable/image_icon" />
         </LinearLayout>
     </ScrollView>
+
+    <Button
+        android:id="@+id/matchingBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_radius_grin"
+        android:text="공구 매칭 " />
 
 </LinearLayout>

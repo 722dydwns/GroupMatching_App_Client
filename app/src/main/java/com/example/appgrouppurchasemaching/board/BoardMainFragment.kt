@@ -116,11 +116,6 @@ class BoardMainFragment : Fragment() { //게시판 목록 메인 프래그먼트
         //항목 속 데이터를 불러오는 함수 (F=불러오고 T=초기화함)
         getContentList(true) //싹 비우고 매번 이 화면에 오면 새롭게 DB 상에서 데이터 읽어 구성하도록
 
-        //새로고침 기능 이벤트 처리 -> swiper
-        binding.boardMainSwipe.setOnRefreshListener {
-            getContentList(true) //다시 데이터 한 번 더 새롭게 가져오고
-            binding.boardMainSwipe.isRefreshing = false //계속 스와이프 돌아가는 것 없애줌
-        }
 
         return binding.root
     }

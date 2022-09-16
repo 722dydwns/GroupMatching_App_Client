@@ -24,7 +24,6 @@ class LoginFragment : Fragment() { //로그인 프래그먼트
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
     }
 
     override fun onCreateView(

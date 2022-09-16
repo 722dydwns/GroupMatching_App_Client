@@ -80,7 +80,6 @@ class BoardReadFragment : Fragment() { //게시글 읽기 프래그먼트 화면
                     binding.boardReadWriteDate.text = obj.getString("content_write_date")
                     binding.boardReadText.text = obj.getString("content_text")
 
-
                     //이미지 파일명 받음
                     val contentImage = obj.getString("content_image")
                     if(contentImage == "null") { //얻어온 이미지 없다면

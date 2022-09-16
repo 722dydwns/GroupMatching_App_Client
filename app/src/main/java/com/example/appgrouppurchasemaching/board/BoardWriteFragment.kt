@@ -249,7 +249,6 @@ class BoardWriteFragment : Fragment() {//글쓰기 프래그먼트 화면
                     uploadImage = BitmapFactory.decodeFile(contentUri.path)
                     binding.boardWriteImage.setImageBitmap(uploadImage) //이미지뷰에 세팅
 
-
                     val file = File(contentUri.path)
                     file.delete()
                 }

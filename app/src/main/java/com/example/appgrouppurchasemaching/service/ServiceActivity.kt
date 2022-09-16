@@ -17,6 +17,7 @@ import android.os.SystemClock
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import com.example.appgrouppurchasemaching.R
@@ -48,16 +49,21 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
     //마커 초기화를 위해 마커들도 리스트에 담을 예정
     var nearby_marker_list = ArrayList<Marker>()
 
+    //클릭한 현재 마커 위치 담을 변수 선언
+    lateinit var A_marker_position : String
+    lateinit var A_marker_title : String
+    lateinit var A_marker_snippet : String
+
     //서비스 intent 변수
     lateinit var serviceIntent: Intent
 
     // -> 다이얼로그 띄울 목록 arrayOf() 생성
     val dialogData = arrayOf(
-        "accounting", "airport", "amusement_park",
-        "aquarium", "art_gallery", "atm", "bakery",
+        "accounting",
+         "atm", "bakery", "apartment",
         "bank", "bar", "beauty_salon", "bicycle_store",
         "book_store", "bowling_alley", "bus_station",
-        "cafe", "campground", "car_dealer", "car_rental",
+        "cafe", "car_dealer", "car_rental",
         "car_repair", "car_wash", "casino", "cemetery",
         "church", "city_hall", "clothing_store", "convenience_store",
         "courthouse", "dentist", "department_store", "doctor",
@@ -101,7 +107,7 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
         super.onCreate(savedInstanceState)
         //binding 처리
         binding = ActivityServiceBinding.inflate(layoutInflater)
-        binding.mapToolbar.title = "Google Map 현재 위치 확인"
+        binding.mapToolbar.title = "Google Map"
 
         binding.mapToolbar.inflateMenu(R.menu.map_menu)
         binding.mapToolbar.setOnMenuItemClickListener{
@@ -138,12 +144,22 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
 
                             getNearbyPlaceData(dialogData[i]) //i번째 데이터 넘겨줌
                         }
-                        //띄우기기
+                        //띄우기
                         placeListBuilder.show()
                     true
                 }
                 else -> false
             }
+        }
+
+        //'약속잡기' 버튼 클릭 시, 이벤트 처리
+        binding.promiseBtn.setOnClickListener {
+            //여기서 클릭한 마커의 데이터값을 다음으로 보냄
+
+            //채팅 화면으로 전환
+         //   Log.d("test", A_marker_position)
+        //    Log.d("test", A_marker_snippet)
+         //   Log.d("test", A_marker_title)
         }
 
         setContentView(binding.root)
@@ -192,7 +208,6 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
 
         //서비스에서 현 위치값을 가져오는 쓰레드 가동시키기
         serviceRunning = true
-
         thread {
             while (serviceRunning) {
                 SystemClock.sleep(1000) //1초마다
@@ -201,6 +216,8 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
                 runOnUiThread {
                     if (myLocation != null) {
                         setUserLocation(myLocation!!, true)
+                        //현 위치 로그 찍기
+                        Log.d("test", myLocation.toString())
                         serviceRunning = false
                     }
                 }
@@ -252,10 +269,10 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
         //네트워크와 데이터 처리할 땐 thread 필수
         thread {
             //요청할 API site 주소
-            var site = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?"
-            site += "location=${myLocation?.latitude},${myLocation?.longitude}"
+            var site = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
+            site += "?location=${myLocation?.latitude},${myLocation?.longitude}"
             site += "&radius=1000&type=${type}"
-            site += "&key=AIzaSyCWxie_s84vOaG1VMT5dRgndafpXe1Ntw8&language=ko"
+            site += "&key=AIzaSyAxlXAC_wKh7N8th-s6ewua3JKpwp6Lkzk&language=ko"
 
             //Log 찍어보기
             //Log.d("test", site)
@@ -284,6 +301,7 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
 
             //JSON 객체 생성
             val root = JSONObject(data)
+            // status == OK 일 때만 가져옴
             if(root.getString("status") == "OK") {
                 val results = root.getJSONArray("results")
                 for(i in 0 until results.length()) {
@@ -295,12 +313,6 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
                     val lng = location.getDouble("lng")
                     val name = results_item.getString("name")
                     val vicinity = results_item.getString("vicinity")
-
-                    //Log.d("test", "${lat}")
-                    //Log.d("test", "${lng}")
-                    //Log.d("test", "${name}")
-                    //Log.d("test", "${vicinity}")
-                    //Log.d("test", "------------------")
 
                     //로컬 변수 리스트에 받은 데이터들 다시 담기
                     nearby_lat.add(lat)
@@ -318,24 +330,36 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
                             placeMarkerOptions.title(nearby_name[i])
                             placeMarkerOptions.snippet(nearby_vicinity[i])
 
-                            //마커 클릭 이벤트
-                            
-
+                            //구글맵 마커 추가시킴
                             val placeMarker = googleMap.addMarker(placeMarkerOptions)
                             nearby_marker_list.add(placeMarker!!)
+
+                            //마커 클릭 리스너
+                            googleMap.setOnMarkerClickListener (object: GoogleMap.OnMarkerClickListener{
+                                override fun onMarkerClick(p0: Marker): Boolean {
+                                    //토스트 메시지 띄우기
+                                    Toast.makeText(this@ServiceActivity, p0.title + p0.snippet, Toast.LENGTH_SHORT).show()
+
+                                    //이 값을 다시 약속잡기 화면에 보내주어야 함
+                                  //  A_marker_title = p0.title.toString()
+                                  //  A_marker_snippet = p0.snippet.toString()
+                                  //  A_marker_position = p0.position.toString()
+
+                                    return false
+                                }
+                            })
+
+                            }
                         }
                     }
 
                 }
             }
 
-
-
-
         }
 
     }
-}
+
 
 
 

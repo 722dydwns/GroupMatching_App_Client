@@ -38,7 +38,7 @@ class JoinFragment : Fragment() { //회원가입 프래그먼트 화면
             //가입 ID : 사용자 X 입력 상태에 유효성 검사
             if(joinId == null || joinId.length == 0) {
                 val dialogBuilder = AlertDialog.Builder(requireContext())
-                dialogBuilder.setTitle("아이디 입력 오류류")
+                dialogBuilder.setTitle("아이디 입력 오류")
                 dialogBuilder.setMessage("아이디를 입력해주세요")
                 dialogBuilder.setPositiveButton("확인"){ dialogInterface: DialogInterface, i: Int ->
                     binding.joinId.requestFocus() //다시 id 입력칸에 재포커싱
@@ -49,7 +49,7 @@ class JoinFragment : Fragment() { //회원가입 프래그먼트 화면
             //가입 Pw : 사용자 X 입력 상태에 유효성 검사
             if(joinPw == null || joinPw.length == 0){
                 val dialogBuilder = AlertDialog.Builder(requireContext())
-                dialogBuilder.setTitle("비밀번호 입력 오류류")
+                dialogBuilder.setTitle("비밀번호 입력 오류")
                 dialogBuilder.setMessage("비밀번호를 입력해주세요")
                 dialogBuilder.setPositiveButton("확인"){ dialogInterface: DialogInterface, i: Int ->
                     binding.joinPw.requestFocus() //다시 pw 입력칸에 재포커싱
