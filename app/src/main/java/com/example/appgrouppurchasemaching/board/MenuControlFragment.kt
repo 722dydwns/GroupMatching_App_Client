@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.example.appgrouppurchasemaching.service.ServiceActivity
 import com.example.appgrouppurchasemaching.databinding.FragmentMenuControlBinding
+import com.example.appgrouppurchasemaching.message.UserMatchingActivity
 
 class MenuControlFragment : Fragment() { //메뉴 컨트롤할 프래그먼트
 
@@ -74,6 +75,13 @@ class MenuControlFragment : Fragment() { //메뉴 컨트롤할 프래그먼트
         binding.map.setOnClickListener {
             //화면 전환 처리
             val Intent = Intent(requireContext(), ServiceActivity::class.java)
+            startActivity(Intent)
+        }
+
+        //'약속잡기' 클릭 시, 관련 버튼들이 존재하는 액티비티로 화면 전환 처리
+        binding.matchingBtn.setOnClickListener {
+            //화면 전환 처리
+            val Intent = Intent(requireContext(), UserMatchingActivity::class.java)
             startActivity(Intent)
         }
 

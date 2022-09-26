@@ -14,20 +14,17 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppGroupPurchaseMaching"
-        android:requestLegacyExternalStorage="true"
         android:usesCleartextTraffic="true">
         <activity
-            android:name=".intro.SplashActivity"
-            android:exported="true" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:name=".message.UserMatchingActivity"
+            android:exported="true" />
+        <activity
+            android:name=".message.MatchingActivity"
+            android:exported="true" />
 
         <service
             android:name=".service.MyLocationService"
@@ -40,7 +37,7 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyB7jqeJDg21reY8e60ycR-qVGtMfuVn-ZU"/>
+            android:value="AIzaSyB7jqeJDg21reY8e60ycR-qVGtMfuVn-ZU" />
 
         <activity
             android:name=".board.BoardMainActivity"
@@ -48,7 +45,11 @@
         <activity
             android:name=".intro.IntroActivity"
             android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
 
         <provider
@@ -65,8 +66,5 @@
             android:name=".intro.MainActivity"
             android:exported="true" />
     </application>
-
-
-
 
 </manifest>

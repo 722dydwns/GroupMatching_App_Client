@@ -107,7 +107,7 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
         super.onCreate(savedInstanceState)
         //binding 처리
         binding = ActivityServiceBinding.inflate(layoutInflater)
-        binding.mapToolbar.title = "Google Map"
+        binding.mapToolbar.title = "약속장소 정하기"
 
         binding.mapToolbar.inflateMenu(R.menu.map_menu)
         binding.mapToolbar.setOnMenuItemClickListener{

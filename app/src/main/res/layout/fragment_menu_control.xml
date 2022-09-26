@@ -90,7 +90,7 @@
 
 
                     <ImageView
-                        android:id="@+id/category5"
+                        android:id="@+id/matchingBtn"
                         android:layout_width="100dp"
                         android:layout_height="100dp"
                         android:layout_weight="1"
