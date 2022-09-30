@@ -2,17 +2,25 @@ package com.example.appgrouppurchasemaching.intro
 
 import android.content.DialogInterface
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.example.appgrouppurchasemaching.databinding.FragmentJoinBinding
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 class JoinFragment : Fragment() { //회원가입 프래그먼트 화면
 
     //바인딩 설정
     lateinit var binding : FragmentJoinBinding
+
+    //파이어베이스 회원 정보 등록
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,12 +66,14 @@ class JoinFragment : Fragment() { //회원가입 프래그먼트 화면
                 return@setOnClickListener
             }
 
+
             //닉네임 설정 화면으로 전환
             //아직 회원가입 중인 상태라서 여기서 입력한 가입 정보를 다시 닉네임 화면에도 보내주어야 한다.
             val act = activity as MainActivity
             //전체 관리 중인 Main 액티비티의 변수에 현재 프래그먼트 상에 입력된 정보값을 담아둔다.
             act.userId = joinId
             act.userPw = joinPw
+
 
             act.fragmentController("nick_name", true, true)
         }

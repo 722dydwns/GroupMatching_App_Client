@@ -4,6 +4,7 @@ import android.Manifest
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -11,6 +12,12 @@ import androidx.fragment.app.FragmentTransaction
 import com.example.appgrouppurchasemaching.R
 import com.example.appgrouppurchasemaching.ServerInfo
 import com.example.appgrouppurchasemaching.databinding.ActivityBoardMainBinding
+import com.example.appgrouppurchasemaching.utils.FirebaseAuthUtils
+import com.example.appgrouppurchasemaching.utils.FirebaseRef
+import com.example.appgrouppurchasemaching.utils.UserDataModel
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONArray
@@ -32,6 +39,15 @@ class BoardMainActivity : AppCompatActivity() { //게시판 메인 액티비티
     var readContentIdx = 0
     //목록 상 현재 있는 페이지 번호 변수
     var nowPage = 1
+
+    //현재 로그인 사용자의 닉네임
+    private lateinit var currentUserNickName : String
+
+    //현재 로그인한 사용자의 uid
+    private var uid = FirebaseAuthUtils.getUid() //회원 uid 값 가져오기
+
+    //모든 사용자 리스트
+    val usersDataList = mutableListOf<UserDataModel>()
 
     //권한 확인 리스트
     @RequiresApi(Build.VERSION_CODES.Q)
@@ -85,6 +101,11 @@ class BoardMainActivity : AppCompatActivity() { //게시판 메인 액티비티
 
         //초기 화면 프래그먼트 설정
         fragmentController("board_main", false, false)
+
+
+        //test
+        getMyUserData() //내 닉네임 가져오기
+
     }
 
     //게시글 관련 프래그먼트 컨트롤러 메소드 작성
@@ -125,6 +146,61 @@ class BoardMainActivity : AppCompatActivity() { //게시판 메인 액티비티
     //'뒤로가기' 구현을 위해 name 프래그먼트를 백스택에서 제거 메소드 작성
     fun fragmentRemoveBackStack(name:String){
         supportFragmentManager.popBackStack(name, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+    }
+
+
+    //DB에서 현재 로그인한 사용자의 회원 정보 받아오는 부분
+    fun getMyUserData() {
+        val postListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+
+                //데이터 가져와서
+                val data = dataSnapshot.getValue(UserDataModel::class.java)
+                Log.d("test", data?.nickname.toString())
+
+                //현재 User 의 gender 정보
+               // currentUserNickName = data?.nickname.toString()
+
+                // 내부적으로 반대의 이름 갖는 회원 데이터를 불러오도록 작성할 것
+              //  getUserDataList(currentUserNickName)
+
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                // Getting Post failed, log a message
+
+            }
+        }
+        FirebaseRef.userInfoRef.child(uid).addValueEventListener(postListener)
+    }
+
+    //DB에서 회원정보 받아오는 부분
+    fun getUserDataList(currentUserGender : String) {
+        val postListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+
+                for(dataModel in dataSnapshot.children) {
+
+                    val user = dataModel.getValue(UserDataModel::class.java)
+
+                    if(user?.nickname.toString().equals(currentUserGender)) {
+                        //만약 같은 이름인 경우 = 내 하위에 담을 필요 없고
+
+                    }else{ //다른 이름인 경우
+                        usersDataList.add(user!!) //이 경우에만 UserList에 담음
+                        //Log.d("test", usersDataList.toString())
+                    }
+                }
+
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                // Getting Post failed, log a message
+                Log.w("test", "loadPost:onCancelled", databaseError.toException())
+            }
+        }
+
+        FirebaseRef.userInfoRef.addValueEventListener(postListener)
     }
 
 }

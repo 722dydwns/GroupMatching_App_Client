@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.DialogInterface
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +13,8 @@ import androidx.appcompat.app.AlertDialog
 import com.example.appgrouppurchasemaching.R
 import com.example.appgrouppurchasemaching.ServerInfo
 import com.example.appgrouppurchasemaching.databinding.FragmentBoardReadBinding
+import com.example.appgrouppurchasemaching.intro.MainActivity
+import com.example.appgrouppurchasemaching.utils.UserDataModel
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -24,6 +27,8 @@ class BoardReadFragment : Fragment() { //게시글 읽기 프래그먼트 화면
 
     //바인딩
     lateinit var binding : FragmentBoardReadBinding
+
+    var otherNickName = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,6 +56,7 @@ class BoardReadFragment : Fragment() { //게시글 읽기 프래그먼트 화면
             act.fragmentRemoveBackStack("board_read")
         }
 
+
         //서버로부터 글 내용 데이터 받기
         thread {
           val client = OkHttpClient()
@@ -77,6 +83,10 @@ class BoardReadFragment : Fragment() { //게시글 읽기 프래그먼트 화면
                 activity?.runOnUiThread {
                     binding.boardReadSubject.text = obj.getString("content_subject")
                     binding.boardReadWriter.text = obj.getString("content_nick_name")
+
+                    //현재 읽는 글의 닉네임 = 대상자 닉네임 저장시킴
+                    otherNickName = binding.boardReadWriter.text.toString()
+
                     binding.boardReadWriteDate.text = obj.getString("content_write_date")
                     binding.boardReadText.text = obj.getString("content_text")
 
@@ -152,6 +162,23 @@ class BoardReadFragment : Fragment() { //게시글 읽기 프래그먼트 화면
             }
         }
 
+
+        //'공구매칭' 버튼 클릭 이벤트 처리
+        binding.matchingBtn.setOnClickListener {
+            //현재 사용자 uid 값 하위에, 현재 읽은 글의 대상 사용자 uid 값을 받아서 함께 DB에 저장시킨다.
+            //val act = activity as MainActivity
+           // uid = act.uid //현재 로그인한 사용자의 uid 값 세팅
+
+            //대상자 닉네임과 FB 상의 닉네임 일치할 경우에 한해서 uid 값 가져옴
+            Log.d("test", otherNickName) //좋아요한 대상자 이름값 가져옴
+
+
+
+           val act = activity as BoardMainActivity
+           act.getUserDataList(otherNickName) //호출
+
+            //여기서 좋아요한 대상자 회원의 uid 포함하여 함수 호출시킴
+        }
 
         return binding.root
     }

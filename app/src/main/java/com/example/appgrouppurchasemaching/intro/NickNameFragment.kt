@@ -3,13 +3,18 @@ package com.example.appgrouppurchasemaching.intro
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.example.appgrouppurchasemaching.ServerInfo
 import com.example.appgrouppurchasemaching.databinding.FragmentNickNameBinding
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -22,6 +27,7 @@ class NickNameFragment : Fragment() { //닉네임 화면
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
     }
 
     override fun onCreateView(
@@ -36,6 +42,8 @@ class NickNameFragment : Fragment() { //닉네임 화면
 
         //'입력완료' 버튼 클릭 이벤트 처리
         binding.nicknameJoinBtn.setOnClickListener {
+
+
             //뷰 바인딩 -> 뷰에서 사용자가 입력한 닉네임 값 받기
             val nickNameNickName = binding.nicknameNickname.text.toString()
             //입력값에 대한 유효성 검사 (입력X 상태에 대한)
@@ -53,6 +61,10 @@ class NickNameFragment : Fragment() { //닉네임 화면
             //뷰에서 받은 닉네임 값을 다시 Main액티비티의 변수에 담아둔다.
             val act = activity as MainActivity
             act.userNickName = nickNameNickName
+
+            //FB에도 가입 시도
+            act.FBControl = true // 입력완료 클릭 시 컨트롤 변수 처리
+            act.FBController(act.FBControl, act.userId, act.userPw, act.userNickName) //호출
 
             //-> 서버와 통신 작업
             thread {

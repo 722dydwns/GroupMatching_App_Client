@@ -235,4 +235,6 @@ class BoardMainFragment : Fragment() { //게시판 목록 메인 프래그먼트
 
     }
 
+
+
 }

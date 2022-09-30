@@ -81,7 +81,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="약속 잡기/지도/이벤트"
+                    android:text="약속 잡기/주변 장소 정보/회원 정보"
                     android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
                 <LinearLayout
@@ -103,20 +103,13 @@
                         android:layout_weight="1"
                         android:src="@drawable/main_icon_map" />
 
-                    <ImageView
-                        android:id="@+id/service_event"
-                        android:layout_width="100dp"
-                        android:layout_height="100dp"
-                        android:layout_weight="1"
-                        android:src="@drawable/service_event"/>
-
-
                 </LinearLayout>
+
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="회원 정보"
+                    android:text="회원 정보 페이지"
                     android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
                 <LinearLayout
@@ -125,12 +118,12 @@
 
                     <ImageView
                         android:id="@+id/service_person"
-                        android:layout_width="match_parent"
+                        android:layout_width="100dp"
                         android:layout_height="100dp"
                         android:layout_weight="1"
                         android:src="@drawable/service_person" />
-
                 </LinearLayout>
+
 
             </LinearLayout>
 

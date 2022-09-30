@@ -73,6 +73,12 @@ class LoginFragment : Fragment() { //로그인 프래그먼트
                 return@setOnClickListener
             }
 
+            // -> FB 로그인 시도
+            val act = activity as MainActivity
+            act.FBLoginControl = true
+            act.FBLoginController(act.FBControl, loginId, loginPw) //호출
+
+
             //-> 서버 통신 작업 수행
             thread {
                 val client = OkHttpClient() //클라이언트 객체
