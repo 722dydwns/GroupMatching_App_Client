@@ -84,6 +84,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/background_radius_grin"
-        android:text="공구 매칭 " />
+        android:text="매칭 리스트에 담기 " />
 
 </LinearLayout>

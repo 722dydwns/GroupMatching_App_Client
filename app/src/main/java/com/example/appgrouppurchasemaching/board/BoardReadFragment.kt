@@ -1,5 +1,6 @@
 package com.example.appgrouppurchasemaching.board
 
+import android.app.Activity
 import android.content.Context
 import android.content.DialogInterface
 import android.graphics.BitmapFactory
@@ -14,7 +15,12 @@ import com.example.appgrouppurchasemaching.R
 import com.example.appgrouppurchasemaching.ServerInfo
 import com.example.appgrouppurchasemaching.databinding.FragmentBoardReadBinding
 import com.example.appgrouppurchasemaching.intro.MainActivity
+import com.example.appgrouppurchasemaching.utils.FirebaseAuthUtils
+import com.example.appgrouppurchasemaching.utils.FirebaseRef
 import com.example.appgrouppurchasemaching.utils.UserDataModel
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -27,6 +33,8 @@ class BoardReadFragment : Fragment() { //게시글 읽기 프래그먼트 화면
 
     //바인딩
     lateinit var binding : FragmentBoardReadBinding
+
+    private var uid = FirebaseAuthUtils.getUid() //내 uid 값 가져오기
 
     var otherNickName = ""
 
@@ -163,24 +171,58 @@ class BoardReadFragment : Fragment() { //게시글 읽기 프래그먼트 화면
         }
 
 
-        //'공구매칭' 버튼 클릭 이벤트 처리
+        //'매칭 리스트에 담기' 버튼 클릭 이벤트 처리
         binding.matchingBtn.setOnClickListener {
-            //현재 사용자 uid 값 하위에, 현재 읽은 글의 대상 사용자 uid 값을 받아서 함께 DB에 저장시킨다.
-            //val act = activity as MainActivity
-           // uid = act.uid //현재 로그인한 사용자의 uid 값 세팅
 
             //대상자 닉네임과 FB 상의 닉네임 일치할 경우에 한해서 uid 값 가져옴
             Log.d("test", otherNickName) //좋아요한 대상자 이름값 가져옴
+            getUserDataList(otherNickName) //리스트에 현재 좋아요한 대상자 이름기준으로 내 uid 하위에 대상 uid 담기
 
-
-
-           val act = activity as BoardMainActivity
-           act.getUserDataList(otherNickName) //호출
-
-            //여기서 좋아요한 대상자 회원의 uid 포함하여 함수 호출시킴
         }
 
         return binding.root
+    }
+
+    //좋아요 대상 닉네임 주면 해당 사람의 uid 값을 하위에 add 처리 하는 메소드
+    private fun getUserDataList(UserNickName: String) {
+        val postListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+
+                for (dataModel in dataSnapshot.children) {
+
+                    val user = dataModel.getValue(UserDataModel::class.java)
+                    //방금 좋아요 누른 사용자 닉네임이 동일한 애의 회원에 한해서
+                    if (user?.nickname.toString().equals(UserNickName)) { //회원 데이터 중 해당 닉네임 갖는 데이터 존재할 경우
+
+                        val act = activity as BoardMainActivity
+                        act.usersDataList.add(user!!) //여기서 액티비티 단위로 관리하는 리스트 변수에 add에 담음
+
+                        userLikeOtherUser(uid, user.uid.toString())
+                      //-> 파이어베이스 상에 현재 로그인 uid 하위에 담은 매칭 대상 uid 담음
+
+                    } else { //다른 경우 처리 X
+
+                    }
+
+                }
+
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                // Getting Post failed, log a message
+                Log.w("test", "loadPost:onCancelled", databaseError.toException())
+            }
+        }
+
+        FirebaseRef.userInfoRef.addValueEventListener(postListener)
+    }
+
+    //파이어베이스 상에 내 uid 하위에 내가 좋아요한 대상 uid 담는 메소드
+    private fun userLikeOtherUser(myUid: String, otherUid: String) {
+
+        //나의 uid를 상위에, 하위에는 내가 좋아요한 uid 회원들을 나열하는 구조로 DB에 저장
+        FirebaseRef.userWantMatchingRef.child(myUid).child(otherUid).setValue("true")
+
     }
 
 

@@ -29,6 +29,8 @@ class BoardMainActivity : AppCompatActivity() { //게시판 메인 액티비티
     //프래그먼트 컨트롤 변수
     lateinit var currentFragment : Fragment
 
+    val usersDataList = mutableListOf<UserDataModel>() //사용자 정보 객체 단위로 저장하는데
+
     //게시판 목록 '이름'들을 받을 List<> 변수
     val boardNameList = ArrayList<String>()
     //게시판 목록 'idx' 받을 List<> 변수
@@ -46,8 +48,6 @@ class BoardMainActivity : AppCompatActivity() { //게시판 메인 액티비티
     //현재 로그인한 사용자의 uid
     private var uid = FirebaseAuthUtils.getUid() //회원 uid 값 가져오기
 
-    //모든 사용자 리스트
-    val usersDataList = mutableListOf<UserDataModel>()
 
     //권한 확인 리스트
     @RequiresApi(Build.VERSION_CODES.Q)

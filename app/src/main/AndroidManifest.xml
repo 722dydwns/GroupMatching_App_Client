@@ -20,6 +20,9 @@
         android:theme="@style/Theme.AppGroupPurchaseMaching"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".message.MyLikeListActivity"
+            android:exported="true" />
+        <activity
             android:name=".message.UserMatchingActivity"
             android:exported="true" />
 
