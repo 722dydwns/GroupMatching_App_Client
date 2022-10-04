@@ -156,10 +156,10 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
         binding.promiseBtn.setOnClickListener {
             //여기서 클릭한 마커의 데이터값을 다음으로 보냄
 
-            //채팅 화면으로 전환
-         //   Log.d("test", A_marker_position)
-        //    Log.d("test", A_marker_snippet)
-         //   Log.d("test", A_marker_title)
+            //채팅 화면으로 putExtra() 처리해서 데이터 보내주고. 화면 전환 하기
+           Log.d("test", A_marker_position)
+           Log.d("test", A_marker_snippet)
+           Log.d("test", A_marker_title)
         }
 
         setContentView(binding.root)
@@ -342,9 +342,9 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
                                     Toast.makeText(this@ServiceActivity, p0.title + p0.snippet, Toast.LENGTH_SHORT).show()
 
                                     //이 값을 다시 약속잡기 화면에 보내주어야 함
-                                  //  A_marker_title = p0.title.toString()
-                                  //  A_marker_snippet = p0.snippet.toString()
-                                  //  A_marker_position = p0.position.toString()
+                                   A_marker_title = p0.title.toString()
+                                   A_marker_snippet = p0.snippet.toString()
+                                   A_marker_position = p0.position.toString()
 
                                     return false
                                 }

@@ -3,6 +3,7 @@ package com.example.appgrouppurchasemaching.board
 import android.app.Activity
 import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
@@ -10,11 +11,13 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.example.appgrouppurchasemaching.R
 import com.example.appgrouppurchasemaching.ServerInfo
 import com.example.appgrouppurchasemaching.databinding.FragmentBoardReadBinding
 import com.example.appgrouppurchasemaching.intro.MainActivity
+import com.example.appgrouppurchasemaching.message.MyLikeListActivity
 import com.example.appgrouppurchasemaching.utils.FirebaseAuthUtils
 import com.example.appgrouppurchasemaching.utils.FirebaseRef
 import com.example.appgrouppurchasemaching.utils.UserDataModel
@@ -34,9 +37,11 @@ class BoardReadFragment : Fragment() { //게시글 읽기 프래그먼트 화면
     //바인딩
     lateinit var binding : FragmentBoardReadBinding
 
-    private var uid = FirebaseAuthUtils.getUid() //내 uid 값 가져오기
+    private var MyUid = FirebaseAuthUtils.getUid() //내 uid 값 가져오기
 
     var otherNickName = ""
+
+    var controlToast = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -174,9 +179,11 @@ class BoardReadFragment : Fragment() { //게시글 읽기 프래그먼트 화면
         //'매칭 리스트에 담기' 버튼 클릭 이벤트 처리
         binding.matchingBtn.setOnClickListener {
 
-            //대상자 닉네임과 FB 상의 닉네임 일치할 경우에 한해서 uid 값 가져옴
-            Log.d("test", otherNickName) //좋아요한 대상자 이름값 가져옴
             getUserDataList(otherNickName) //리스트에 현재 좋아요한 대상자 이름기준으로 내 uid 하위에 대상 uid 담기
+            Toast.makeText(activity, "매칭 목록 담기 성공", Toast.LENGTH_SHORT).show()
+
+            val intent = Intent(activity, MyLikeListActivity::class.java)
+            startActivity(intent)
 
         }
 
@@ -192,16 +199,15 @@ class BoardReadFragment : Fragment() { //게시글 읽기 프래그먼트 화면
 
                     val user = dataModel.getValue(UserDataModel::class.java)
                     //방금 좋아요 누른 사용자 닉네임이 동일한 애의 회원에 한해서
-                    if (user?.nickname.toString().equals(UserNickName)) { //회원 데이터 중 해당 닉네임 갖는 데이터 존재할 경우
+                    if (user?.nickname.toString()
+                            .equals(UserNickName)
+                    ) { //회원 데이터 중 해당 닉네임 갖는 데이터 존재할 경우
 
                         val act = activity as BoardMainActivity
                         act.usersDataList.add(user!!) //여기서 액티비티 단위로 관리하는 리스트 변수에 add에 담음
 
-                        userLikeOtherUser(uid, user.uid.toString())
-                      //-> 파이어베이스 상에 현재 로그인 uid 하위에 담은 매칭 대상 uid 담음
-
-                    } else { //다른 경우 처리 X
-
+                        userLikeOtherUser(MyUid, user.uid.toString())
+                        //-> 파이어베이스 상에 현재 로그인 uid 하위에 담은 매칭 대상 uid 담음
                     }
 
                 }

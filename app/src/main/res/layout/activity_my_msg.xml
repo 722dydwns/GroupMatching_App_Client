@@ -5,10 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".message.MyLikeListActivity">
+    tools:context=".message.MyMsgActivity">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/myLike_toolbar"
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/mainColor"
@@ -16,9 +16,8 @@
         android:theme="?attr/actionBarTheme" />
 
     <ListView
-        android:id="@+id/userListView"
+        android:id="@+id/msgListView"
         android:layout_width="match_parent"
-        android:layout_height="710dp"
-        android:layout_marginStart="0dp"
-        android:layout_marginBottom="72dp" />
+        android:layout_height="match_parent" />
+
 </LinearLayout>

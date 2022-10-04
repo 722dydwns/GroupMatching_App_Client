@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <EditText
+        android:id="@+id/sendTextArea"
+        android:layout_width="match_parent"
+        android:layout_margin="20dp"
+        android:background="@android:color/transparent"
+        android:hint="매칭 메시지를 입력하세요"
+        android:layout_height="100dp"/>
+
+    <Button
+        android:id="@+id/sendBtnArea"
+        android:text="매칭 원해요"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="@drawable/background_radius_grin"
+        android:layout_margin="20dp"/>
+
+</LinearLayout>

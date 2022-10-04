@@ -16,7 +16,7 @@ class ServerInfo { //'서버' IP 정보 객체
      //const val SERVER_IP = "172.30.1.34"
 
      //카페 커피빈
-     const val SERVER_IP = "172.30.1.53"
+     const val SERVER_IP = "172.30.1.14"
 
      //const val SERVER_IP = "172.30.1.24"
  }

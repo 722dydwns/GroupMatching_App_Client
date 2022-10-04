@@ -5,15 +5,19 @@
       <map>
         <entry key="..\:/Users/LG/AndroidStudioProjects/AppGroupPurchaseMaching/app/src/main/res/drawable/background_radius.xml" value="0.1609375" />
         <entry key="..\:/Users/LG/AndroidStudioProjects/AppGroupPurchaseMaching/app/src/main/res/drawable/background_radius_grin.xml" value="0.1609375" />
+        <entry key="..\:/Users/LG/AndroidStudioProjects/AppGroupPurchaseMaching/app/src/main/res/drawable/message_box_background.xml" value="0.22135416666666666" />
         <entry key="..\:/Users/LG/AndroidStudioProjects/AppGroupPurchaseMaching/app/src/main/res/layout/activity_board_main.xml" value="0.1" />
+        <entry key="..\:/Users/LG/AndroidStudioProjects/AppGroupPurchaseMaching/app/src/main/res/layout/activity_chat.xml" value="0.1" />
         <entry key="..\:/Users/LG/AndroidStudioProjects/AppGroupPurchaseMaching/app/src/main/res/layout/activity_intro.xml" value="0.21666666666666667" />
         <entry key="..\:/Users/LG/AndroidStudioProjects/AppGroupPurchaseMaching/app/src/main/res/layout/activity_main.xml" value="0.1" />
         <entry key="..\:/Users/LG/AndroidStudioProjects/AppGroupPurchaseMaching/app/src/main/res/layout/activity_matching.xml" value="0.1" />
         <entry key="..\:/Users/LG/AndroidStudioProjects/AppGroupPurchaseMaching/app/src/main/res/layout/activity_my_like_list.xml" value="0.1" />
+        <entry key="..\:/Users/LG/AndroidStudioProjects/AppGroupPurchaseMaching/app/src/main/res/layout/activity_my_msg.xml" value="0.1" />
         <entry key="..\:/Users/LG/AndroidStudioProjects/AppGroupPurchaseMaching/app/src/main/res/layout/activity_service.xml" value="0.1" />
         <entry key="..\:/Users/LG/AndroidStudioProjects/AppGroupPurchaseMaching/app/src/main/res/layout/activity_splash.xml" value="0.1" />
         <entry key="..\:/Users/LG/AndroidStudioProjects/AppGroupPurchaseMaching/app/src/main/res/layout/activity_user_matching.xml" value="0.1484375" />
         <entry key="..\:/Users/LG/AndroidStudioProjects/AppGroupPurchaseMaching/app/src/main/res/layout/board_main_recycler_item.xml" value="0.1" />
+        <entry key="..\:/Users/LG/AndroidStudioProjects/AppGroupPurchaseMaching/app/src/main/res/layout/custom_dialog.xml" value="0.1" />
         <entry key="..\:/Users/LG/AndroidStudioProjects/AppGroupPurchaseMaching/app/src/main/res/layout/fragment_board_main.xml" value="0.10260416666666666" />
         <entry key="..\:/Users/LG/AndroidStudioProjects/AppGroupPurchaseMaching/app/src/main/res/layout/fragment_board_modify.xml" value="0.25" />
         <entry key="..\:/Users/LG/AndroidStudioProjects/AppGroupPurchaseMaching/app/src/main/res/layout/fragment_board_read.xml" value="0.1" />
@@ -23,6 +27,8 @@
         <entry key="..\:/Users/LG/AndroidStudioProjects/AppGroupPurchaseMaching/app/src/main/res/layout/fragment_menu_control.xml" value="0.1" />
         <entry key="..\:/Users/LG/AndroidStudioProjects/AppGroupPurchaseMaching/app/src/main/res/layout/fragment_nick_name.xml" value="0.1" />
         <entry key="..\:/Users/LG/AndroidStudioProjects/AppGroupPurchaseMaching/app/src/main/res/layout/list_view_item.xml" value="0.1" />
+        <entry key="..\:/Users/LG/AndroidStudioProjects/AppGroupPurchaseMaching/app/src/main/res/layout/recieve.xml" value="0.1" />
+        <entry key="..\:/Users/LG/AndroidStudioProjects/AppGroupPurchaseMaching/app/src/main/res/layout/send.xml" value="0.1" />
         <entry key="..\:/Users/LG/AndroidStudioProjects/AppGroupPurchaseMaching/app/src/main/res/menu/board_main_menu.xml" value="0.1" />
         <entry key="..\:/Users/LG/AndroidStudioProjects/AppGroupPurchaseMaching/app/src/main/res/menu/board_modify_menu.xml" value="0.1" />
         <entry key="..\:/Users/LG/AndroidStudioProjects/AppGroupPurchaseMaching/app/src/main/res/menu/board_read_menu.xml" value="0.1" />

@@ -13,5 +13,7 @@ class FirebaseRef { //RealDB 저장 규격 짜기
 
         val userWantMatchingRef = database.getReference("userWantMatching") //회원이 매칭 원하는 다른 User 정보는 이 경로로
 
+        val userMsgRef = database.getReference("userMsg") // 메시지 내용 데이터는 이 경로로
+
     }
 }

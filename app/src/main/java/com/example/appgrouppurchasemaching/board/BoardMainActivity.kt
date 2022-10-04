@@ -158,11 +158,6 @@ class BoardMainActivity : AppCompatActivity() { //게시판 메인 액티비티
                 val data = dataSnapshot.getValue(UserDataModel::class.java)
                 Log.d("test", data?.nickname.toString())
 
-                //현재 User 의 gender 정보
-               // currentUserNickName = data?.nickname.toString()
-
-                // 내부적으로 반대의 이름 갖는 회원 데이터를 불러오도록 작성할 것
-              //  getUserDataList(currentUserNickName)
 
             }
 

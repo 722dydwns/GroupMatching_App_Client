@@ -10,9 +10,13 @@ import androidx.fragment.app.FragmentTransaction
 import com.example.appgrouppurchasemaching.R
 import com.example.appgrouppurchasemaching.databinding.ActivityMainBinding
 import com.example.appgrouppurchasemaching.utils.FirebaseRef
+import com.example.appgrouppurchasemaching.utils.MyInfo
 import com.example.appgrouppurchasemaching.utils.UserDataModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 
@@ -84,9 +88,9 @@ class MainActivity : AppCompatActivity() { //main 액티비티
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    Toast.makeText(this, "성공", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "성공", Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(this, "실패", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "실패", Toast.LENGTH_SHORT).show()
                 }
             }
     }
@@ -120,6 +124,5 @@ class MainActivity : AppCompatActivity() { //main 액티비티
 
         trans.commit() //위의 설정 적용
     }
-
 
 }

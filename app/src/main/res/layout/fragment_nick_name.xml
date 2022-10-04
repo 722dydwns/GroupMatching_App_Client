@@ -49,7 +49,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
                 android:text="입력완료"
-                android:background="@color/mainColor"
+                android:background="@drawable/background_radius_grin"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large" />
         </FrameLayout>
     </LinearLayout>

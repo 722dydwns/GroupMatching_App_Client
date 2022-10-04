@@ -9,8 +9,7 @@ import android.widget.TextView
 import com.example.appgrouppurchasemaching.R
 import com.example.appgrouppurchasemaching.utils.UserDataModel
 
-
-class ListViewAdapter(val context : Context, val items : MutableList<UserDataModel>) : BaseAdapter() {
+class MsgAdapter(val context : Context, val items : MutableList<MsgModel>) : BaseAdapter() {
     override fun getCount(): Int {
         return items.size
     }
@@ -30,10 +29,11 @@ class ListViewAdapter(val context : Context, val items : MutableList<UserDataMod
             convertView = LayoutInflater.from(parent?.context).inflate(R.layout.list_view_item, parent, false)
         }
 
-        //내가 좋아요한 사람의 닉네임을 담아주기
-        val nickname = convertView!!.findViewById<TextView>(R.id.listViewItemNickname)
-        nickname.text = items[position].nickname
-
+        //화면 표시용
+        val nicknameArea = convertView!!.findViewById<TextView>(R.id.listViewItemNicknameArea)
+        val textArea = convertView!!.findViewById<TextView>(R.id.listViewItemNickname)
+        nicknameArea.text = items[position].senderInfo
+        textArea.text = items[position].sendTxt
 
 
         return convertView!!
