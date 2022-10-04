@@ -36,7 +36,7 @@ class MyMsgActivity : AppCompatActivity() { //내 메시지 목록 액티비티
 
         setContentView(binding.root)
 
-        binding.toolbar.title = "받은 매칭 쪽지 목록 리스트"
+        binding.toolbar.title = "받은 매칭 목록 리스트"
 
         getMyMsg() //내 메시지 목록 불러오기
         getUserDataList() //호출
@@ -56,15 +56,10 @@ class MyMsgActivity : AppCompatActivity() { //내 메시지 목록 액티비티
             var senderUserName = senderNameList[position]
             var senderUserUid = senderUidList[position] // 여기서 계속 에러가 남 왜지 ?
 
-            Log.d("test", senderUserName)
-            Log.d("test", senderUserUid)
-
             intent.putExtra("name", senderUserName)
             intent.putExtra("uid", senderUserUid)
 
-
             startActivity(intent)
-
         }
 
     }
@@ -81,14 +76,12 @@ class MyMsgActivity : AppCompatActivity() { //내 메시지 목록 액티비티
                 senderUidList.clear()
 
                 for (dataModel in dataSnapshot.children) {
-
                     val msg = dataModel.getValue(MsgModel::class.java)
-
-                    senderNameList.add(msg?.senderInfo.toString()) //여기서 대상 회원의 닉네임 받아주고
+                    senderNameList.add(msg?.senderInfo.toString()) //여기서 대상 회원의 닉네임 받아주고  // Error 남 String 형 변환 안됨?
                     msgList.add(msg!!) //리스트에 데이터모델 담기
 
                 }
-                //최신순으로 데이터 보이게 리스트 역순 정렬
+                //최신순으로 데이터 보이게 리스트 '역순 정렬'
                 msgList.reverse()
                 senderNameList.reverse()
                 senderUidList.reverse()

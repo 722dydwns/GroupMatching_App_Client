@@ -28,9 +28,6 @@
         <activity
             android:name=".message.MyLikeListActivity"
             android:exported="true" />
-        <activity
-            android:name=".message.UserMatchingActivity"
-            android:exported="true" />
 
         <service
             android:name=".service.MyLocationService"

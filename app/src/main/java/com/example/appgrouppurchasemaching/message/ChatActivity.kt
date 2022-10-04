@@ -14,7 +14,7 @@ import com.example.appgrouppurchasemaching.databinding.ActivityChatBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 
-class ChatActivity : AppCompatActivity() {
+class ChatActivity : AppCompatActivity() { //'채팅' 액티비티 화면
 
     lateinit var binding : ActivityChatBinding
 
