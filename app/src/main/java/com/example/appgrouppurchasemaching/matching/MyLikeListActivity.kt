@@ -62,15 +62,21 @@ class MyLikeListActivity : AppCompatActivity() { //'내가' 원하는 매칭 대
 
         }
 
+        //Back 버튼
+        //이전으로   finish()
+
         //'내가 좋아요하는 리스트' 버튼
         binding.MyLikeBtn.setOnClickListener {
-
+            val intent = Intent(this,  MyLikeListActivity::class.java)
+            startActivity(intent)
+            finish()
         }
 
         //'나를 좋아하고 있는 리스트'버튼
         binding.OtherLikeMeBtn.setOnClickListener {
             val intent = Intent(this, OtherLikeListActivity::class.java)
             startActivity(intent)
+            finish()
         }
 
     }

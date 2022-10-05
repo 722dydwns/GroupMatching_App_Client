@@ -129,7 +129,7 @@ class LoginFragment : Fragment() { //로그인 프래그먼트
                                 editor?.commit() //실행
 
                                 //화면 전환 처리
-                                val boardMainIntent = Intent(requireContext(), BoardMainActivity::class.java)
+                                val boardMainIntent = Intent(requireContext(),BoardMainActivity::class.java)
                                 startActivity(boardMainIntent)
                                 activity?.finish()
                             }

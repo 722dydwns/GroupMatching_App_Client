@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import com.example.appgrouppurchasemaching.R
+import com.example.appgrouppurchasemaching.board.BoardMainActivity
 import com.example.appgrouppurchasemaching.databinding.ActivityMyPageBinding
 import com.example.appgrouppurchasemaching.utils.FirebaseAuthUtils
 import com.example.appgrouppurchasemaching.utils.FirebaseRef

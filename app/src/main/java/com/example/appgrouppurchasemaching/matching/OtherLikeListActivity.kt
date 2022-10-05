@@ -68,7 +68,9 @@ class OtherLikeListActivity : AppCompatActivity() { //'나를'원하는 매칭 �
 
         //'나를 좋아하고 있는 리스트'버튼
         binding.OtherLikeMeBtn.setOnClickListener {
-
+            val intent = Intent(this, OtherLikeListActivity::class.java)
+            startActivity(intent)
+            finish()
         }
 
     }
