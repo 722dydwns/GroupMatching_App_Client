@@ -8,7 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.example.appgrouppurchasemaching.service.ServiceActivity
 import com.example.appgrouppurchasemaching.databinding.FragmentMenuControlBinding
-import com.example.appgrouppurchasemaching.message.MyLikeListActivity
+import com.example.appgrouppurchasemaching.matching.MyLikeListActivity
 
 class MenuControlFragment : Fragment() { //메뉴 컨트롤할 프래그먼트
 

@@ -1,6 +1,5 @@
 package com.example.appgrouppurchasemaching.board
 
-import android.app.Activity
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -16,8 +15,7 @@ import androidx.appcompat.app.AlertDialog
 import com.example.appgrouppurchasemaching.R
 import com.example.appgrouppurchasemaching.ServerInfo
 import com.example.appgrouppurchasemaching.databinding.FragmentBoardReadBinding
-import com.example.appgrouppurchasemaching.intro.MainActivity
-import com.example.appgrouppurchasemaching.message.MyLikeListActivity
+import com.example.appgrouppurchasemaching.matching.MyLikeListActivity
 import com.example.appgrouppurchasemaching.utils.FirebaseAuthUtils
 import com.example.appgrouppurchasemaching.utils.FirebaseRef
 import com.example.appgrouppurchasemaching.utils.UserDataModel

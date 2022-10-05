@@ -1,18 +1,15 @@
-package com.example.appgrouppurchasemaching.message
+package com.example.appgrouppurchasemaching.matching
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.health.UidHealthStats
 import android.util.Log
 import android.widget.ListView
-import android.widget.Toast
 import com.example.appgrouppurchasemaching.R
-import com.example.appgrouppurchasemaching.board.BoardMainActivity
 import com.example.appgrouppurchasemaching.databinding.ActivityOtherLikeListBinding
+import com.example.appgrouppurchasemaching.message.ChatActivity
 import com.example.appgrouppurchasemaching.utils.FirebaseAuthUtils
 import com.example.appgrouppurchasemaching.utils.FirebaseRef
-import com.example.appgrouppurchasemaching.utils.MyInfo
 import com.example.appgrouppurchasemaching.utils.UserDataModel
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError

@@ -1,4 +1,4 @@
-package com.example.appgrouppurchasemaching.message
+package com.example.appgrouppurchasemaching.matching
 
 import android.content.Context
 import android.view.LayoutInflater

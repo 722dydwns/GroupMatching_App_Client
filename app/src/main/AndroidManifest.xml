@@ -23,7 +23,7 @@
             android:name=".matching.MatchingActivity"
             android:exported="true" />
         <activity
-            android:name=".message.OtherLikeListActivity"
+            android:name=".matching.OtherLikeListActivity"
             android:exported="true" />
         <activity
             android:name=".message.ChatActivity"
@@ -32,7 +32,7 @@
             android:name=".message.MyMsgActivity"
             android:exported="true" />
         <activity
-            android:name=".message.MyLikeListActivity"
+            android:name=".matching.MyLikeListActivity"
             android:exported="true" />
 
         <service
