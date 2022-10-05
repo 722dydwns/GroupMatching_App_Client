@@ -1,12 +1,15 @@
 package com.example.appgrouppurchasemaching.matching
 
+import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.ListView
 import com.example.appgrouppurchasemaching.R
+import com.example.appgrouppurchasemaching.board.BoardMainActivity
 import com.example.appgrouppurchasemaching.databinding.ActivityOtherLikeListBinding
+import com.example.appgrouppurchasemaching.intro.MainActivity
 import com.example.appgrouppurchasemaching.message.ChatActivity
 import com.example.appgrouppurchasemaching.utils.FirebaseAuthUtils
 import com.example.appgrouppurchasemaching.utils.FirebaseRef
@@ -59,7 +62,7 @@ class OtherLikeListActivity : AppCompatActivity() { //'나를'원하는 매칭 �
             startActivity(intent)
         }
         //뒤로가기 처리 = BackBtn
-        binding.myLikeToolbar.inflateMenu(R.menu.back_menu)
+        binding.myLikeToolbar.inflateMenu(R.menu.back_back_menu)
         binding.myLikeToolbar.setOnMenuItemClickListener {
             when(it.itemId) {
                 R.id.back_btn -> {

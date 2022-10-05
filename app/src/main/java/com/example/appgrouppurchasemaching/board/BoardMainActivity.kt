@@ -98,8 +98,8 @@ class BoardMainActivity : AppCompatActivity() { //게시판 메인 액티비티
         }
 
         //초기 화면 프래그먼트 설정
-        fragmentController("board_main", false, false)
-
+       // fragmentController("board_main", false, false)
+        fragmentController("menu_controller", false, false)
 
         //test
         getMyUserData() //내 닉네임 가져오기

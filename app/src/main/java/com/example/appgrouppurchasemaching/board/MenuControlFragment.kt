@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.example.appgrouppurchasemaching.R
 import com.example.appgrouppurchasemaching.service.ServiceActivity
 import com.example.appgrouppurchasemaching.databinding.FragmentMenuControlBinding
 import com.example.appgrouppurchasemaching.intro.IntroActivity
@@ -32,17 +33,7 @@ class MenuControlFragment : Fragment() { //메뉴 컨트롤할 프래그먼트
         //바인딩
         binding = FragmentMenuControlBinding.inflate(inflater)
         //title
-        binding.menuControlToolbar.title = "메뉴 카테고리"
-
-        //Back 버튼을 툴바 상단의 navigationIcon으로 추가한다.
-        val navIcon = requireContext().getDrawable(androidx.appcompat.R.drawable.abc_ic_ab_back_material)
-        binding.menuControlToolbar.navigationIcon = navIcon
-
-        //수정) 뒤로가기 네비게이션 클릭 이벤트 처리
-        binding.menuControlToolbar.setNavigationOnClickListener {
-            val act = activity as BoardMainActivity
-            act.fragmentRemoveBackStack("menu_controller")
-        }
+        binding.menuControlToolbar.title = "                 공동구매 메이트 매칭 홈 "
 
         //'전체 게시글' 목록 이동
         binding.all.setOnClickListener {

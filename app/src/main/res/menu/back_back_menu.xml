@@ -4,8 +4,9 @@
 
     <item
         android:id="@+id/back_btn"
-        android:icon="@drawable/control_btn"
+        android:icon="@drawable/back_btn"
         android:title="뒤로가기"
         app:showAsAction="always" />
+
 
 </menu>
