@@ -58,7 +58,17 @@ class OtherLikeListActivity : AppCompatActivity() { //'나를'원하는 매칭 �
 
             startActivity(intent)
         }
+        //뒤로가기 처리 = BackBtn
+        binding.myLikeToolbar.inflateMenu(R.menu.back_menu)
+        binding.myLikeToolbar.setOnMenuItemClickListener {
+            when(it.itemId) {
+                R.id.back_btn -> {
+                    finish()
+                }
+            }
 
+            true
+        }
 
         //'내가 좋아요하는 리스트' 버튼
         binding.MyLikeBtn.setOnClickListener {

@@ -16,17 +16,17 @@ tools:context=".matching.OtherLikeListActivity">
     android:minHeight="?attr/actionBarSize"
     android:theme="?attr/actionBarTheme" />
 
-<Button
-    android:id="@+id/MyLikeBtn"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:text="내가 매칭 원하는 대상" />
+    <Button
+        android:id="@+id/MyLikeBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="내가 원하는 매칭 대상" />
 
-<Button
-    android:id="@+id/OtherLikeMeBtn"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:text="나를 원하는 대상 리스트" />
+    <Button
+        android:id="@+id/OtherLikeMeBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="나를 원하는 매칭 대상" />
 
     <ListView
         android:id="@+id/userListView"

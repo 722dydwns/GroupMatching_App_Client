@@ -61,8 +61,7 @@ class BoardWriteFragment : Fragment() {//글쓰기 프래그먼트 화면
         binding.boardWriteToolbar.title = "공구 매칭 쓰기"
 
         //Back 버튼을 툴바 상단의 navigationIcon으로 추가한다.
-        val navIcon =
-            requireContext().getDrawable(androidx.appcompat.R.drawable.abc_ic_ab_back_material)
+        val navIcon = requireContext().getDrawable(androidx.appcompat.R.drawable.abc_ic_ab_back_material)
         binding.boardWriteToolbar.navigationIcon = navIcon
 
         //뒤로가기 네비게이션 클릭 이벤트 처리

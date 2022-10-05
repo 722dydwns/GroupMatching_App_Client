@@ -1,5 +1,6 @@
 package com.example.appgrouppurchasemaching.intro
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -9,9 +10,11 @@ import com.example.appgrouppurchasemaching.databinding.ActivityMyPageBinding
 import com.example.appgrouppurchasemaching.utils.FirebaseAuthUtils
 import com.example.appgrouppurchasemaching.utils.FirebaseRef
 import com.example.appgrouppurchasemaching.utils.UserDataModel
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.ktx.Firebase
 
 class MyPageActivity : AppCompatActivity() { //마이페이지 = 회원 개인 정보 페이지
 
@@ -29,6 +32,29 @@ class MyPageActivity : AppCompatActivity() { //마이페이지 = 회원 개인 �
         getMyData() //호출
 
         binding.toolbar.title =  " 마이페이지[회원정보]"
+
+        //뒤로가기 처리 = BackBtn
+        binding.toolbar.inflateMenu(R.menu.back_menu)
+        binding.toolbar.setOnMenuItemClickListener {
+            when(it.itemId) {
+                R.id.back_btn -> {
+                    finish()
+                }
+            }
+
+            true
+        }
+
+
+        //로그아웃 처리
+        binding.logoutBtn.setOnClickListener {
+            val auth = Firebase.auth
+            auth.signOut() //로그아웃 처리
+
+            //인트로 화면 전환
+            val intent = Intent(this, IntroActivity::class.java)
+            startActivity(intent)
+        }
 
     }
 

@@ -19,13 +19,13 @@
         android:id="@+id/MyLikeBtn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="내가 매칭 원하는 대상" />
+        android:text="내가 원하는 매칭 대상" />
 
     <Button
         android:id="@+id/OtherLikeMeBtn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="나와 매칭 원하는 대상 리스트" />
+        android:text="나를 원하는 매칭 대상" />
 
     <ListView
         android:id="@+id/userListView"
