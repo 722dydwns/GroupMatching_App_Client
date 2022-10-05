@@ -84,7 +84,6 @@ class MenuControlFragment : Fragment() { //메뉴 컨트롤할 프래그먼트
             startActivity(intent)
         }
 
-
         return binding.root
     }
 

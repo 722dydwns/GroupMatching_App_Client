@@ -21,7 +21,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 
-class MyLikeListActivity : AppCompatActivity() { //나의 좋아요 리스트 액티비티 화면
+class MyLikeListActivity : AppCompatActivity() { //'내가' 원하는 매칭 대상 리스트 액티비티 화면
 
     //바인딩
     lateinit var binding : ActivityMyLikeListBinding
@@ -41,7 +41,7 @@ class MyLikeListActivity : AppCompatActivity() { //나의 좋아요 리스트 �
         setContentView(binding.root)
         getMyUserData() // 현재 로그인한 사용자 정보 닉네임 얻기
 
-        binding.myLikeToolbar.title = "매칭 리스트"
+        binding.myLikeToolbar.title = " 내가 원하는 매칭 리스트 "
 
         getMyLikeList() //내가 좋아요한 애들 목록 얻기
 
@@ -65,6 +65,17 @@ class MyLikeListActivity : AppCompatActivity() { //나의 좋아요 리스트 �
 
             startActivity(intent)
 
+        }
+
+        //'내가 좋아요하는 리스트' 버튼
+        binding.MyLikeBtn.setOnClickListener {
+
+        }
+
+        //'나를 좋아하고 있는 리스트'버튼
+        binding.OtherLikeMeBtn.setOnClickListener {
+            val intent = Intent(this, OtherLikeListActivity::class.java)
+            startActivity(intent)
         }
 
     }
@@ -94,7 +105,6 @@ class MyLikeListActivity : AppCompatActivity() { //나의 좋아요 리스트 �
 
                 for (dataModel in dataSnapshot.children) {
                     // 내가 좋아요 한 사람들의 uid가 likeUserList에 들어있음
-
                     likeUserListUid.add(dataModel.key.toString())
                 }
                 getUserDataList() //사용자 데이터를 UserDataModel 타입으로 얻기

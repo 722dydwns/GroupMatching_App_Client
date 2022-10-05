@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical"
+tools:context=".message.OtherLikeListActivity">
+
+<androidx.appcompat.widget.Toolbar
+    android:id="@+id/myLike_toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/mainColor"
+    android:minHeight="?attr/actionBarSize"
+    android:theme="?attr/actionBarTheme" />
+
+<Button
+    android:id="@+id/MyLikeBtn"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="내가 매칭 원하는 대상" />
+
+<Button
+    android:id="@+id/OtherLikeMeBtn"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="나를 원하는 대상 리스트" />
+
+    <ListView
+        android:id="@+id/userListView"
+        android:layout_width="match_parent"
+        android:layout_height="571dp"
+        android:layout_marginStart="0dp"
+        android:layout_marginBottom="72dp" />
+</LinearLayout>

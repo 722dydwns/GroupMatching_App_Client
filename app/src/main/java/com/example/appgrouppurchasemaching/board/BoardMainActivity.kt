@@ -31,6 +31,8 @@ class BoardMainActivity : AppCompatActivity() { //게시판 메인 액티비티
 
     val usersDataList = mutableListOf<UserDataModel>() //사용자 정보 객체 단위로 저장하는데
 
+    val OtherLikeList = mutableListOf<UserDataModel>() // 다르 사용자의 likeList
+
     //게시판 목록 '이름'들을 받을 List<> 변수
     val boardNameList = ArrayList<String>()
     //게시판 목록 'idx' 받을 List<> 변수
@@ -42,8 +44,6 @@ class BoardMainActivity : AppCompatActivity() { //게시판 메인 액티비티
     //목록 상 현재 있는 페이지 번호 변수
     var nowPage = 1
 
-    //현재 로그인 사용자의 닉네임
-    private lateinit var currentUserNickName : String
 
     //현재 로그인한 사용자의 uid
     private var uid = FirebaseAuthUtils.getUid() //회원 uid 값 가져오기
@@ -156,46 +156,14 @@ class BoardMainActivity : AppCompatActivity() { //게시판 메인 액티비티
 
                 //데이터 가져와서
                 val data = dataSnapshot.getValue(UserDataModel::class.java)
-                Log.d("test", data?.nickname.toString())
-
 
             }
-
             override fun onCancelled(databaseError: DatabaseError) {
                 // Getting Post failed, log a message
-
             }
         }
         FirebaseRef.userInfoRef.child(uid).addValueEventListener(postListener)
     }
 
-    //DB에서 회원정보 받아오는 부분
-    fun getUserDataList(currentUserGender : String) {
-        val postListener = object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-
-                for(dataModel in dataSnapshot.children) {
-
-                    val user = dataModel.getValue(UserDataModel::class.java)
-
-                    if(user?.nickname.toString().equals(currentUserGender)) {
-                        //만약 같은 이름인 경우 = 내 하위에 담을 필요 없고
-
-                    }else{ //다른 이름인 경우
-                        usersDataList.add(user!!) //이 경우에만 UserList에 담음
-                        //Log.d("test", usersDataList.toString())
-                    }
-                }
-
-            }
-
-            override fun onCancelled(databaseError: DatabaseError) {
-                // Getting Post failed, log a message
-                Log.w("test", "loadPost:onCancelled", databaseError.toException())
-            }
-        }
-
-        FirebaseRef.userInfoRef.addValueEventListener(postListener)
-    }
 
 }
