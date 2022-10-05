@@ -31,8 +31,6 @@ class BoardMainActivity : AppCompatActivity() { //게시판 메인 액티비티
 
     val usersDataList = mutableListOf<UserDataModel>() //사용자 정보 객체 단위로 저장하는데
 
-    val OtherLikeList = mutableListOf<UserDataModel>() // 다르 사용자의 likeList
-
     //게시판 목록 '이름'들을 받을 List<> 변수
     val boardNameList = ArrayList<String>()
     //게시판 목록 'idx' 받을 List<> 변수

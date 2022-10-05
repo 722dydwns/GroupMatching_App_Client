@@ -8,7 +8,11 @@ import android.view.View
 import android.view.ViewGroup
 import com.example.appgrouppurchasemaching.service.ServiceActivity
 import com.example.appgrouppurchasemaching.databinding.FragmentMenuControlBinding
+import com.example.appgrouppurchasemaching.intro.IntroActivity
+import com.example.appgrouppurchasemaching.intro.MyPageActivity
 import com.example.appgrouppurchasemaching.matching.MyLikeListActivity
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 class MenuControlFragment : Fragment() { //메뉴 컨트롤할 프래그먼트
 
@@ -81,6 +85,22 @@ class MenuControlFragment : Fragment() { //메뉴 컨트롤할 프래그먼트
         //나의 매칭좋아요 리스트 목록 클릭 이벤트 처리
         binding.matchingList.setOnClickListener {
             val intent = Intent(requireContext(), MyLikeListActivity::class.java)
+            startActivity(intent)
+        }
+
+        //회원정보 페이지 클릭 시 이벤트 처리
+        binding.myPage.setOnClickListener {
+            val intent = Intent(requireContext(), MyPageActivity::class.java)
+            startActivity(intent)
+        }
+
+        //Logout 버튼 클릭 시 이벤트 처리
+        binding.MyLogout.setOnClickListener {
+            val auth = Firebase.auth
+            auth.signOut() //로그아웃 처리
+
+            //인트로 화면 전환
+            val intent = Intent(requireContext(), IntroActivity::class.java)
             startActivity(intent)
         }
 

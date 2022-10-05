@@ -2,6 +2,7 @@ package com.example.appgrouppurchasemaching.service
 
 import android.Manifest
 import android.app.ActivityManager
+import android.app.ListActivity
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
@@ -24,6 +25,7 @@ import com.example.appgrouppurchasemaching.R
 import com.example.appgrouppurchasemaching.board.BoardMainActivity
 import com.example.appgrouppurchasemaching.databinding.ActivityServiceBinding
 import com.example.appgrouppurchasemaching.intro.MainActivity
+import com.example.appgrouppurchasemaching.message.ChatActivity
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
 import org.json.JSONObject
@@ -50,9 +52,12 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
     var nearby_marker_list = ArrayList<Marker>()
 
     //클릭한 현재 마커 위치 담을 변수 선언
+   // val mapInfoList = mutableListOf<MapInfoModel>() //사용자가 담는 장소 정보
+
     lateinit var A_marker_position : String
     lateinit var A_marker_title : String
     lateinit var A_marker_snippet : String
+
 
     //서비스 intent 변수
     lateinit var serviceIntent: Intent
@@ -155,7 +160,6 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
         //'약속잡기' 버튼 클릭 시, 이벤트 처리
         binding.promiseBtn.setOnClickListener {
             //여기서 클릭한 마커의 데이터값을 다음으로 보냄
-
             //채팅 화면으로 putExtra() 처리해서 데이터 보내주고. 화면 전환 하기
            Log.d("test", A_marker_position)
            Log.d("test", A_marker_snippet)
@@ -344,6 +348,7 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
                                     Toast.makeText(this@ServiceActivity, p0.title + p0.snippet, Toast.LENGTH_SHORT).show()
 
                                     //이 값을 다시 약속잡기 화면에 보내주어야 함
+
                                    A_marker_title = p0.title.toString()
                                    A_marker_snippet = p0.snippet.toString()
                                    A_marker_position = p0.position.toString()

@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appgrouppurchasemaching.R
 import com.example.appgrouppurchasemaching.databinding.ActivityChatBinding
+import com.example.appgrouppurchasemaching.service.ServiceActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 
@@ -67,7 +68,6 @@ class ChatActivity : AppCompatActivity() { //'채팅' 액티비티 화면
                     messageList.clear() //데이터 중복 방지
 
                     for(postSnapshot in snapshot.children){
-
                         val message = postSnapshot.getValue(Message::class.java)
                         messageList.add(message!!)
                     }
@@ -91,6 +91,8 @@ class ChatActivity : AppCompatActivity() { //'채팅' 액티비티 화면
                 }
             messageBox.setText("")
         }
+
+
 
     }
 }
