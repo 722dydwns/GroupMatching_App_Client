@@ -97,8 +97,6 @@ class MyLocationService : Service() { // 위치 서비스
         manager.removeUpdates(locationListener)
     }
 
-
-
     //접속하는 Activity에서 서비스 추출을 위해 사용하는 클래스
     inner class MyLocationServiceBinder : Binder() {
         fun getService() : MyLocationService{

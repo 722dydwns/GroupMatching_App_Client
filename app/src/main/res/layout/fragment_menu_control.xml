@@ -95,12 +95,6 @@
                         android:layout_weight="1"
                         android:src="@drawable/matching_list" />
 
-                    <ImageView
-                        android:id="@+id/messaging_list"
-                        android:layout_width="100dp"
-                        android:layout_height="100dp"
-                        android:layout_weight="1"
-                        android:src="@drawable/message_list" />
 
                     <ImageView
                         android:id="@+id/map"

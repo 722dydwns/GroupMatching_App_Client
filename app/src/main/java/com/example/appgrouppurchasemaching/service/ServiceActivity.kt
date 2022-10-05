@@ -186,6 +186,8 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
 
     }
 
+
+
     // 지도가 준비가 완료되면 호출되는 메서드
     override fun onMapReady(p0: GoogleMap) {
         googleMap = p0
@@ -360,6 +362,7 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
         }
 
     }
+
 
 
 

@@ -27,11 +27,10 @@ class MyLikeListActivity : AppCompatActivity() { //나의 좋아요 리스트 �
     lateinit var binding : ActivityMyLikeListBinding
     //내 uid
     private val uid = FirebaseAuthUtils.getUid()
-    //대상 uid
-    lateinit var getterUid : String
 
+    //내가 좋아요한 대상의 정보 데이터 모델
     private val likeUserList = mutableListOf<UserDataModel>()
-    private val likeUserListUid = mutableListOf<String>()
+    private val likeUserListUid = mutableListOf<String>() //Uid
 
     lateinit var listviewAdapter : ListViewAdapter
 
@@ -42,7 +41,7 @@ class MyLikeListActivity : AppCompatActivity() { //나의 좋아요 리스트 �
         setContentView(binding.root)
         getMyUserData() // 현재 로그인한 사용자 정보 닉네임 얻기
 
-        binding.myLikeToolbar.title = "원하는 매칭 리스트"
+        binding.myLikeToolbar.title = "매칭 리스트"
 
         getMyLikeList() //내가 좋아요한 애들 목록 얻기
 
@@ -54,8 +53,18 @@ class MyLikeListActivity : AppCompatActivity() { //나의 좋아요 리스트 �
         //내가 좋아요한 유저 롱클릭 시, 메시지 보내기 창 떠서 메시지 보낼 수 있게 하고
         //상대방에게 알림 띄워주고
         userListView.setOnItemClickListener { parent, view, position, id ->
-            getterUid = likeUserList[position].uid.toString()
-            showDialog() //메시지 보내기 Dialog 띄우기
+            //화면 전환 처리 -> 바로 채팅 액티비티로 이동
+            val intent = Intent(this, ChatActivity::class.java)
+
+            //대상 이름, Uid 필요
+            var OtherUserName = likeUserList[position].nickname
+            var OtherUserUid = likeUserList[position].uid
+
+            intent.putExtra("name", OtherUserName)
+            intent.putExtra("uid",OtherUserUid)
+
+            startActivity(intent)
+
         }
 
     }
@@ -85,6 +94,7 @@ class MyLikeListActivity : AppCompatActivity() { //나의 좋아요 리스트 �
 
                 for (dataModel in dataSnapshot.children) {
                     // 내가 좋아요 한 사람들의 uid가 likeUserList에 들어있음
+
                     likeUserListUid.add(dataModel.key.toString())
                 }
                 getUserDataList() //사용자 데이터를 UserDataModel 타입으로 얻기
@@ -99,22 +109,23 @@ class MyLikeListActivity : AppCompatActivity() { //나의 좋아요 리스트 �
 
     }
 
-    //사용자 정보 데이터 리스트
+    //사용자 '정보 데이터' 리스트
     private fun getUserDataList(){
 
         val postListener = object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
 
+                likeUserList.clear() // 한번 정리해주고
 
                 for (dataModel in dataSnapshot.children) {
                     val user = dataModel.getValue(UserDataModel::class.java)
 
-                    // 전체 유저중에 내가 좋아요한 사람들의 '정보'만 add함
-                    if(likeUserListUid.contains(user?.uid)) {
+                    // 전체 유저중에 내가 좋아요한 사람들 '정보' 이면서 나 자신은 아닌 대상만 add함
+                    if(likeUserListUid.contains(user?.uid) && user?.uid != uid) {
                         likeUserList.add(user!!)
                     }
+                    likeUserList.reverse() //역순
                 }
-
                 listviewAdapter.notifyDataSetChanged() //다시 데이터 그려주기 리스트뷰에
             }
 
@@ -126,41 +137,5 @@ class MyLikeListActivity : AppCompatActivity() { //나의 좋아요 리스트 �
         FirebaseRef.userInfoRef.addValueEventListener(postListener)
     }
 
-    //다이얼로그
-    private fun showDialog() {
-        //다이얼로그 창 레이아웃 뷰 가져오고
-        val mDialogView = LayoutInflater.from(this).inflate(R.layout.custom_dialog, null)
-        val mBuilder = AlertDialog.Builder(this)
-            .setView(mDialogView)
-            .setTitle("매칭 요청")
-
-        val mAlertDialog = mBuilder.show()
-
-        //보내기 버튼 클릭 이벤트 처리
-        val btn = mAlertDialog.findViewById<Button>(R.id.sendBtnArea)
-
-        //사용자 입력한 메시지 텍스트 받아오기
-        val textArea = mAlertDialog.findViewById<EditText>(R.id.sendTextArea)
-
-        btn?.setOnClickListener {
-
-            //메시지 데이터 모델 정의
-           val msgModel = MsgModel(MyInfo.myNickname, textArea!!.text.toString())
-
-            FirebaseRef.userMsgRef.child(getterUid).push().setValue(msgModel)
-            mAlertDialog.dismiss() //다이얼로그 종료
-
-            //채팅창으로 화면 전환
-
-
-
-        }
-
-        //FB RealTime DB에 message 경로
-        // message 데이터
-            // 받는 사람 uid
-            // 보낸 사람 닉네임, 메시지 내용
-
-    }
 
 }

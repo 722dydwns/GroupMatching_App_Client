@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import com.example.appgrouppurchasemaching.service.ServiceActivity
 import com.example.appgrouppurchasemaching.databinding.FragmentMenuControlBinding
 import com.example.appgrouppurchasemaching.message.MyLikeListActivity
-import com.example.appgrouppurchasemaching.message.MyMsgActivity
 
 class MenuControlFragment : Fragment() { //메뉴 컨트롤할 프래그먼트
 
@@ -79,16 +78,12 @@ class MenuControlFragment : Fragment() { //메뉴 컨트롤할 프래그먼트
             startActivity(Intent)
         }
 
-        //매칭 리스트 목록 클릭 이벤트 처리
+        //나의 매칭좋아요 리스트 목록 클릭 이벤트 처리
         binding.matchingList.setOnClickListener {
             val intent = Intent(requireContext(), MyLikeListActivity::class.java)
             startActivity(intent)
         }
-        //메시지함 목록 클릭 이벤트 처리
-        binding.messagingList.setOnClickListener {
-            val intent = Intent(requireContext(), MyMsgActivity::class.java)
-            startActivity(intent)
-        }
+
 
         return binding.root
     }
