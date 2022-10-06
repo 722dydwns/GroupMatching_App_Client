@@ -11,6 +11,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -24,12 +25,15 @@ import com.example.appgrouppurchasemaching.ServerInfo
 import com.example.appgrouppurchasemaching.databinding.FragmentBoardModifyBinding
 import okhttp3.*
 import okhttp3.RequestBody.Companion.asRequestBody
+import okio.Buffer
+import okio.BufferedSink
 import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 import java.net.URI
 import java.net.URL
 import kotlin.concurrent.thread
+import java.nio.Buffer as Buffer1
 
 
 class BoardModifyFragment : Fragment() { //게시글 수정 프래그먼트
@@ -98,6 +102,11 @@ class BoardModifyFragment : Fragment() { //게시글 수정 프래그먼트
                     val boardModifyText = binding.boardModifyText.text.toString()
                     val boardModifyType = act.boardIndexList[binding.boardModifyType.selectedItemPosition + 1]
 
+                    Log.d("test", "boardModifySubject: ${boardModifySubject}")
+                    Log.d("test", "boardModifyText: ${boardModifyText}")
+                    Log.d("test", "boardModifyType.toString(): ${boardModifyType.toString()}")
+
+
                     //유효성 검사 하기
                     // 게시글 제목 유효성 검사
                     if(boardModifySubject == null || boardModifySubject.length == 0){
@@ -125,8 +134,7 @@ class BoardModifyFragment : Fragment() { //게시글 수정 프래그먼트
                     //'서버 접속'
                     thread {
                         val client = OkHttpClient()
-                        val site =
-                            "http://${ServerInfo.SERVER_IP}:8080/App_GroupCharge_Server/modify_content.jsp"
+                        val site = "http://${ServerInfo.SERVER_IP}:8080/App_GroupCharge_Server/modify_content.jsp"
 
                         //첨부이미지 존재할 수 있으므로 FormBody대신 MultipartBody로 사용
                         //서버에 보낼 작업 데이터 세팅
@@ -136,6 +144,8 @@ class BoardModifyFragment : Fragment() { //게시글 수정 프래그먼트
                         builder1.addFormDataPart("content_subject", boardModifySubject)
                         builder1.addFormDataPart("content_text", boardModifyText)
                         builder1.addFormDataPart("content_board_idx", "$boardModifyType")
+
+                        Log.d("test", "builder1.toString(): ${builder1.toString()}")
 
                         //이미지 데이터 세팅
                         var file: File? = null
@@ -155,6 +165,11 @@ class BoardModifyFragment : Fragment() { //게시글 수정 프래그먼트
                         }
                         //서버에 요청
                         val formBody = builder1.build()
+                        /* formBody logging
+                        var buf = Buffer()
+                        formBody.writeTo(buf)
+                        Log.d("test", "buf read: ${buf.readUtf8()}")
+                         */
                         val request = Request.Builder().url(site).post(formBody).build()
                         val response = client.newCall(request).execute()
 

@@ -1,5 +1,6 @@
 package com.example.appgrouppurchasemaching.message
 
+import android.app.Service
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -51,6 +52,19 @@ class ChatActivity : AppCompatActivity() { //'채팅' 액티비티 화면
 
         binding.ChatToolbar.title = " " + name
 
+        binding.ChatToolbar.inflateMenu(R.menu.back_back_menu)
+        binding.ChatToolbar.setOnMenuItemClickListener {
+
+            when(it.itemId) {
+                R.id.back_btn ->{
+                    finish()
+                }
+            }
+
+            true
+        }
+
+
         chatRecyclerView = binding.chatRecyclerView
         messageBox = binding.messageBox
         sendButton = binding.sendButton
@@ -82,6 +96,10 @@ class ChatActivity : AppCompatActivity() { //'채팅' 액티비티 화면
         //보내기 버튼 클릭 시 이벤트 처리 = 메시지를 DB 에 담는 처리
         sendButton.setOnClickListener {
             val message = messageBox.text.toString()
+            if (message.isEmpty()) {
+                return@setOnClickListener
+            }
+
             val messageObject = Message(message, senderUid)
 
             mDbRef.child("chats").child(senderRoom!!).child("messages").push()
@@ -90,6 +108,13 @@ class ChatActivity : AppCompatActivity() { //'채팅' 액티비티 화면
                         .setValue(messageObject)
                 }
             messageBox.setText("")
+        }
+
+        //지도 아이콘 클릭 시
+        binding.mapOption.setOnClickListener {
+            val intent = Intent(this, ServiceActivity::class.java)
+            startActivity(intent)
+            finish()
         }
 
 

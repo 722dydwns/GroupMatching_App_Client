@@ -28,6 +28,7 @@ import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
+import okio.Buffer
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.concurrent.thread
@@ -117,6 +118,12 @@ class BoardWriteFragment : Fragment() {//글쓰기 프래그먼트 화면
                     val boardWriteText = binding.boardWriteText.text.toString()
                     //액티비티 단위로 호환되는 게시글 목록 idx 가져옴
                     val boardWriteType = act.boardIndexList[binding.boardWriteType.selectedItemPosition + 1]
+
+                    Log.d("test", "boardWriteSubject: ${boardWriteSubject}")
+                    Log.d("test", "boardWriteText: ${boardWriteText}")
+                    Log.d("test", "boardWriteType.toString(): ${boardWriteType.toString()}")
+
+
                     //앱 단위로 호환되는 Preferences에 저장된 로그인 idx 가져옴
                     val pref = requireContext().getSharedPreferences("login_data", Context.MODE_PRIVATE)
                     val boardWriterIdx = pref.getInt("login_user_idx", 0)
@@ -159,6 +166,8 @@ class BoardWriteFragment : Fragment() {//글쓰기 프래그먼트 화면
                         builder1.addFormDataPart("content_subject", boardWriteSubject)
                         builder1.addFormDataPart("content_text", boardWriteText)
 
+                        Log.d("test", "builder1.toString(): ${builder1.toString()}")
+
                         var file : File? = null
                         //사용자가 선택한 이미지 파일 존재하는 경우에 한해서
                         if(uploadImage != null) {
@@ -169,11 +178,18 @@ class BoardWriteFragment : Fragment() {//글쓰기 프래그먼트 화면
                             val fos = FileOutputStream(file)
                             uploadImage?.compress(Bitmap.CompressFormat.JPEG, 100, fos)
                             //파일 읽어서 '서버로 보낼 데이터'에 포함 시켜준다.
-                            builder1.addFormDataPart("content_image", file.name, file.asRequestBody(MultipartBody.FORM))
+                            builder1.addFormDataPart(
+                                "content_image",
+                                file.name,
+                                file.asRequestBody(MultipartBody.FORM))
                         }
 
                         val formBody = builder1.build() //생성
-
+                        /* formBody logging
+                        var buf = Buffer()
+                        formBody.writeTo(buf)
+                        Log.d("test", "buf read: ${buf.readUtf8()}")
+                         */
                         //요청Request
                         val request = Request.Builder().url(site).post(formBody).build()
                         //요청 반환값은 response 변수로 받음
