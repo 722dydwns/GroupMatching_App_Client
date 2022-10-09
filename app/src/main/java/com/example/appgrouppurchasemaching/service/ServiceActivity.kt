@@ -7,17 +7,14 @@ import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
-import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
-import android.os.Build
+import android.location.*
+import android.os.*
 import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
-import android.os.IBinder
-import android.os.SystemClock
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
@@ -25,11 +22,13 @@ import com.example.appgrouppurchasemaching.R
 import com.example.appgrouppurchasemaching.board.BoardMainActivity
 import com.example.appgrouppurchasemaching.databinding.ActivityServiceBinding
 import com.example.appgrouppurchasemaching.intro.MainActivity
+import com.example.appgrouppurchasemaching.matching.MyLikeListActivity
 import com.example.appgrouppurchasemaching.message.ChatActivity
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
 import org.json.JSONObject
 import java.io.BufferedReader
+import java.io.IOException
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
@@ -43,6 +42,8 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
     lateinit var locationListener: LocationListener
     lateinit var googleMap: GoogleMap
 
+    var map_info : MapInfoModel ?= null
+
     //API에서 받은 데이터들 담을 리스트 변수 선언
     var nearby_lat = ArrayList<Double>()
     var nearby_lng = ArrayList<Double>()
@@ -50,10 +51,6 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
     var nearby_vicinity = ArrayList<String>()
     //마커 초기화를 위해 마커들도 리스트에 담을 예정
     var nearby_marker_list = ArrayList<Marker>()
-
-    //클릭한 현재 마커 위치 담을 변수 선언
-   // val mapInfoList = mutableListOf<MapInfoModel>() //사용자가 담는 장소 정보
-
 
     //서비스 intent 변수
     lateinit var serviceIntent: Intent
@@ -106,6 +103,12 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        //채팅창 정보 값 얻기
+        val intent = getIntent()
+        val OtherUid = intent.getStringExtra("OtherUid")
+        val OtherName = intent.getStringExtra("OtherName")
+
         //binding 처리
         binding = ActivityServiceBinding.inflate(layoutInflater)
         binding.mapToolbar.title = "약속장소 정하기"
@@ -149,15 +152,35 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
                         placeListBuilder.show()
                     true
                 }
+
+               //뒤로가기 연결
+
+
                 else -> false
             }
         }
 
-        //'약속잡기' 버튼 클릭 시, 이벤트 처리
+        //'장소선택' 버튼 클릭 시, 이벤트 처리 [마커로 찍거나/검색한 장소값을 보내주어야 함]
         binding.promiseBtn.setOnClickListener {
-            //여기서 클릭한 마커의 데이터값을 다음으로 보냄
-            //채팅 화면으로 putExtra() 처리해서 데이터 보내주고. 화면 전환 하기
 
+            //채팅창에서 지도 눌러서 넘어온 값인 경우
+            if(OtherName != null && OtherUid != null) {
+                val Intent = Intent(this, ChatActivity::class.java)
+                Intent.putExtra("name", OtherName)
+                Intent.putExtra("uid", OtherUid)
+                //여기서 map_info 객체의 값을 전달해주거나
+                startActivity(Intent)
+
+            }else{ //메뉴컨트롤러 화면에서 넘어온 지도의 경우에는 채팅창 정보가 없다.
+                //메시지 띄우고
+
+                Toast.makeText(this@ServiceActivity, "채팅창 정보가 없습니다.", Toast.LENGTH_SHORT).show()
+                //매칭 리스트 화면으로 전환 시킬 것
+                val intent = Intent(this, MyLikeListActivity::class.java)
+                startActivity(intent)
+                //여기서 map_info 객체의 값을 전달해주거나
+                finish()
+            }
         }
 
         setContentView(binding.root)
@@ -178,13 +201,10 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
                 startService(serviceIntent) //서비스가 실행
             }
         }
-
         //서비스에 접속한다.
         bindService(serviceIntent, connection, BIND_AUTO_CREATE)
 
     }
-
-
 
     // 지도가 준비가 완료되면 호출되는 메서드
     override fun onMapReady(p0: GoogleMap) {
@@ -197,13 +217,11 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
         if (ActivityCompat.checkSelfPermission(this, a1) == PackageManager.PERMISSION_GRANTED
             && ActivityCompat.checkSelfPermission(this, a2) == PackageManager.PERMISSION_GRANTED
         ) {
-
             // 확대 축소 버튼
             googleMap.uiSettings.isZoomControlsEnabled = true
 
             // 현재 위치를 표시한다.
             googleMap.isMyLocationEnabled = true
-
         }
 
         //서비스에서 현 위치값을 가져오는 쓰레드 가동시키기
@@ -218,6 +236,7 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
                         setUserLocation(myLocation!!, true)
                         //현 위치 로그 찍기
                         Log.d("test", myLocation.toString())
+
                         serviceRunning = false
                     }
                 }
@@ -239,7 +258,6 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
             googleMap.animateCamera(loc2)
         }
     }
-
 
     //서비스 가동 여부 확인 메소드
     fun isServiceRunning(name : String) : Boolean {
@@ -271,12 +289,9 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
             //요청할 API site 주소
             var site = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
             site += "?location=${myLocation?.latitude},${myLocation?.longitude}"
-            site += "&radius=5000&type=${type}"
+            site += "&radius=500000&type=${type}"
             site += "&key=AIzaSyB7jqeJDg21reY8e60ycR-qVGtMfuVn-ZU&language=ko"
 
-
-            //Log 찍어보기
-            //Log.d("test", site)
 
             //API 주소에서 데이터 가져오기
             val url = URL(site)
@@ -339,9 +354,9 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
                             googleMap.setOnMarkerClickListener (object: GoogleMap.OnMarkerClickListener{
                                 override fun onMarkerClick(p0: Marker): Boolean {
                                     //토스트 메시지 띄우기
-                                    Toast.makeText(this@ServiceActivity, p0.title + p0.snippet, Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(this@ServiceActivity, p0.title + p0.snippet , Toast.LENGTH_SHORT).show()
 
-                                    //이 값을 다시 약속잡기 화면에 보내주어야 함
+                                    map_info = MapInfoModel(p0.position, p0.title, p0.snippet) //지도 정보 객체에 담음
 
                                     return false
                                 }
@@ -356,7 +371,56 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
 
         }
 
+
+    //지도 장소 검색 메소드 - view 의 '검색'버튼 클릭시 호출되도록 onCLick 연결
+    fun searchLocation(view: View) {
+        val locationSearch: EditText = binding.etSearch
+        var location:String
+
+        location = locationSearch.text.toString().trim()
+        var addressList :List<Address>? = null
+
+        if(location == null || location == "") {
+            Toast.makeText(this, "provide location", Toast.LENGTH_SHORT).show()
+
+        }else{
+            val geoCoder = Geocoder(this)
+            try{
+                addressList = geoCoder.getFromLocationName(location, 1)
+            }catch(e:IOException){
+                e.printStackTrace()
+            }
+
+            val address = addressList!![0]
+            val latLng = LatLng(address.latitude, address.longitude)
+
+            //주변장소 마커 찍을 경우 검색한 장소를 기준으로 재측정 가능하도록 여기서 변수값 변경
+            myLocation?.latitude = address.latitude
+            myLocation?.longitude = address.longitude
+
+            //지도에 연결
+            googleMap!!.addMarker(MarkerOptions().position(latLng).title(location))
+            googleMap!!.animateCamera(CameraUpdateFactory.newLatLng(latLng))
+
+            //마커 찍은 곳 장소 정보값 찍기
+            //마커 클릭 리스너
+            googleMap.setOnMarkerClickListener (object: GoogleMap.OnMarkerClickListener{
+
+                override fun onMarkerClick(p0: Marker): Boolean {
+                    //토스트 메시지 띄우기 -> snippet 은 null이고, Title, 좌표값은 가져올 수 있음
+                    Toast.makeText(this@ServiceActivity, p0.title , Toast.LENGTH_SHORT).show()
+
+
+                    //지도 데이터 객체에 담기
+
+                    return false
+                }
+            })
+        }
+
     }
+
+}
 
 
 

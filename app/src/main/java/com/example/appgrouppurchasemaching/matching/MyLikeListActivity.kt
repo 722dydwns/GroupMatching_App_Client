@@ -47,7 +47,7 @@ class MyLikeListActivity : AppCompatActivity() { //'내가' 원하는 매칭 대
         listviewAdapter = ListViewAdapter(this, likeUserList)
         userListView.adapter = listviewAdapter
 
-        //내가 좋아요한 유저 롱클릭 시, 메시지 보내기 창 떠서 메시지 보낼 수 있게 하고
+        //내가 좋아요한 유저 클릭 시, 메시지 보내기 창 떠서 메시지 보낼 수 있게 하고
         //상대방에게 알림 띄워주고
         userListView.setOnItemClickListener { parent, view, position, id ->
             //화면 전환 처리 -> 바로 채팅 액티비티로 이동
@@ -72,7 +72,6 @@ class MyLikeListActivity : AppCompatActivity() { //'내가' 원하는 매칭 대
                     finish()
                 }
             }
-
             true
         }
 

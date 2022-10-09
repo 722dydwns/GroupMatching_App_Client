@@ -7,4 +7,5 @@
         android:icon="@drawable/map_menu"
         android:title="주변정보"
         app:showAsAction="always" />
+
 </menu>

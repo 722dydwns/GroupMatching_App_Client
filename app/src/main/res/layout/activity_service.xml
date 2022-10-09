@@ -19,13 +19,37 @@
         android:id="@+id/map_fragment"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
-        android:layout_height="550dp" />
+        android:layout_height="550dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+            <EditText
+                android:id="@+id/et_search"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:hint="   Search Location"
+                android:inputType="textPersonName"
+                android:textColor="@color/black"
+                android:background="@color/white"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:onClick="searchLocation"
+                android:text="검색"
+                android:textColor="@color/gray" />
+
+        </LinearLayout>
+    </fragment>
 
     <Button
         android:id="@+id/promise_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/background_radius_grin"
-        android:text="약속잡기 " />
+        android:text="장소 선택 " />
 
 </LinearLayout>

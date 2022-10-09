@@ -18,7 +18,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 
-class OtherLikeListActivity : AppCompatActivity() { //'나를'원하는 매칭 대상들을 뽑아오기
+class OtherLikeListActivity : AppCompatActivity() { //'나를' 원하는 매칭 대상들을 뽑아오기
 
     //바인딩
     lateinit var binding : ActivityOtherLikeListBinding
@@ -61,6 +61,7 @@ class OtherLikeListActivity : AppCompatActivity() { //'나를'원하는 매칭 �
 
             startActivity(intent)
         }
+
         //뒤로가기 처리 = BackBtn
         binding.myLikeToolbar.inflateMenu(R.menu.back_back_menu)
         binding.myLikeToolbar.setOnMenuItemClickListener {

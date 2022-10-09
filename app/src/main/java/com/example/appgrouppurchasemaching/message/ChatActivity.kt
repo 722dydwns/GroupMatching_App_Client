@@ -39,12 +39,20 @@ class ChatActivity : AppCompatActivity() { //'채팅' 액티비티 화면
 
         val intent = getIntent()
         val name = intent.getStringExtra("name")
-        val receiverUid = intent.getStringExtra("uid") //보내는 이
+        val receiverUid = intent.getStringExtra("uid") //채팅 상대방 정보
 
-        Log.d("Test", name.toString())
-        Log.d("Test", receiverUid.toString())
+        val senderUid = FirebaseAuth.getInstance().currentUser?.uid //현재 로그인 사용자
 
-        val senderUid = FirebaseAuth.getInstance().currentUser?.uid //받는 사람 uid == 현재 로그인 사용자
+        //지도 아이콘 클릭 시 -> 여기서 지도 누를 때, 채팅방 정보 함께 넘겨줄 것
+        binding.mapOption.setOnClickListener {
+            val intent = Intent(this, ServiceActivity::class.java)
+
+            intent.putExtra("OtherUid", receiverUid.toString())
+            intent.putExtra("OtherName", name)
+
+            startActivity(intent)
+        }
+
         mDbRef = FirebaseDatabase.getInstance().getReference()
 
         senderRoom = receiverUid + senderUid
@@ -54,16 +62,13 @@ class ChatActivity : AppCompatActivity() { //'채팅' 액티비티 화면
 
         binding.ChatToolbar.inflateMenu(R.menu.back_back_menu)
         binding.ChatToolbar.setOnMenuItemClickListener {
-
             when(it.itemId) {
                 R.id.back_btn ->{
                     finish()
                 }
             }
-
             true
         }
-
 
         chatRecyclerView = binding.chatRecyclerView
         messageBox = binding.messageBox
@@ -80,14 +85,12 @@ class ChatActivity : AppCompatActivity() { //'채팅' 액티비티 화면
                 override fun onDataChange(snapshot: DataSnapshot) {
 
                     messageList.clear() //데이터 중복 방지
-
                     for(postSnapshot in snapshot.children){
                         val message = postSnapshot.getValue(Message::class.java)
                         messageList.add(message!!)
                     }
                     messageAdapter.notifyDataSetChanged() //재세팅
                 }
-
                 override fun onCancelled(error: DatabaseError) {
 
                 }
@@ -109,14 +112,6 @@ class ChatActivity : AppCompatActivity() { //'채팅' 액티비티 화면
                 }
             messageBox.setText("")
         }
-
-        //지도 아이콘 클릭 시
-        binding.mapOption.setOnClickListener {
-            val intent = Intent(this, ServiceActivity::class.java)
-            startActivity(intent)
-            finish()
-        }
-
 
 
     }
