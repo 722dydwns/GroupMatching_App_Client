@@ -118,7 +118,6 @@ class BoardMainFragment : Fragment() { //게시판 목록 메인 프래그먼트
         //항목 속 데이터를 불러오는 함수 (F=불러오고 T=초기화함)
         getContentList(true) //싹 비우고 매번 이 화면에 오면 새롭게 DB 상에서 데이터 읽어 구성하도록
 
-
         return binding.root
     }
 

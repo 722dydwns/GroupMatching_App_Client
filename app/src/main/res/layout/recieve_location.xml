@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:padding="10dp"
             android:text="This is btn_recieve Message !!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-            android:textSize="20dp" />
+            android:textSize="15dp" />
 
     </RelativeLayout>
 
