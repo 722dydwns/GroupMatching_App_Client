@@ -67,6 +67,8 @@ class OtherLikeListActivity : AppCompatActivity() { //'나를' 원하는 매칭 
         binding.myLikeToolbar.setOnMenuItemClickListener {
             when(it.itemId) {
                 R.id.back_btn -> {
+                    val intent = Intent(this, BoardMainActivity::class.java)
+                    startActivity(intent)
                     finish()
                 }
             }

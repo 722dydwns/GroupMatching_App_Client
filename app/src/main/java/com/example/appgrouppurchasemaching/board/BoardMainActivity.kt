@@ -1,10 +1,12 @@
 package com.example.appgrouppurchasemaching.board
 
 import android.Manifest
+import android.content.Context
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.inputmethod.InputMethodManager
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -60,6 +62,13 @@ class BoardMainActivity : AppCompatActivity() { //게시판 메인 액티비티
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+//        // 키보드 내리기
+//        val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+//        inputMethodManager.hideSoftInputFromWindow(
+//            currentFocus?.windowToken,
+//            InputMethodManager.HIDE_IMPLICIT_ONLY
+//        )
 
         //binding
         binding = ActivityBoardMainBinding.inflate(layoutInflater)

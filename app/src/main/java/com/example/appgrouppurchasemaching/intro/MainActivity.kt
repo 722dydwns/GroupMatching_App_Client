@@ -1,9 +1,11 @@
 package com.example.appgrouppurchasemaching.intro
 
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.service.autofill.UserData
 import android.util.Log
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
@@ -125,4 +127,12 @@ class MainActivity : AppCompatActivity() { //main 액티비티
         trans.commit() //위의 설정 적용
     }
 
+    fun hideKeyboard() {
+        // 키보드 내리기
+        val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(
+            currentFocus?.windowToken,
+            InputMethodManager.HIDE_NOT_ALWAYS
+        )
+    }
 }

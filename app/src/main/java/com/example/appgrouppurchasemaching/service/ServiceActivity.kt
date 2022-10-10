@@ -2,8 +2,8 @@ package com.example.appgrouppurchasemaching.service
 
 import android.Manifest
 import android.app.ActivityManager
-import android.app.ListActivity
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
@@ -11,17 +11,14 @@ import android.location.*
 import android.os.*
 import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import com.example.appgrouppurchasemaching.R
-import com.example.appgrouppurchasemaching.board.BoardMainActivity
 import com.example.appgrouppurchasemaching.databinding.ActivityServiceBinding
-import com.example.appgrouppurchasemaching.intro.MainActivity
 import com.example.appgrouppurchasemaching.matching.MyLikeListActivity
 import com.example.appgrouppurchasemaching.message.ChatActivity
 import com.google.android.gms.maps.*
@@ -155,7 +152,6 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
 
                //뒤로가기 연결
 
-
                 else -> false
             }
         }
@@ -169,6 +165,12 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
                 Intent.putExtra("name", OtherName)
                 Intent.putExtra("uid", OtherUid)
                 //여기서 map_info 객체의 값을 전달해주거나
+
+                if (map_info != null) {
+                    Log.d("share_location", "map_info is not null")
+                    Intent.putExtra("mapInfo", map_info)
+                    Log.d("share_location", "Intent 에 map_info 넘겨줌. map_info.marker_title: ${map_info?.marker_title}")
+                }
                 startActivity(Intent)
 
             }else{ //메뉴컨트롤러 화면에서 넘어온 지도의 경우에는 채팅창 정보가 없다.
@@ -178,6 +180,7 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
                 //매칭 리스트 화면으로 전환 시킬 것
                 val intent = Intent(this, MyLikeListActivity::class.java)
                 startActivity(intent)
+
                 //여기서 map_info 객체의 값을 전달해주거나
                 finish()
             }
@@ -203,11 +206,32 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
         }
         //서비스에 접속한다.
         bindService(serviceIntent, connection, BIND_AUTO_CREATE)
-
     }
+
+    /**
+    fun setLocationLatLngIfThisClickedByMessage() {
+        val intent = getIntent()
+
+        if (intent.hasExtra("isClickedByMessage")) {
+            // 메세지에서 공유된 위치를 클릭해서 들어온 경우
+            Log.d("test", "intent.hashExtra(\"isClickedByMessage\"): ${intent.hasExtra("isClickedByMessage")}")
+
+            // "장소선택" 버튼 숨김
+            binding.promiseBtn.visibility = View.GONE
+
+            Log.d("test", "this::googleMap.isInitialized: ${this::googleMap.isInitialized}")
+            if (this::googleMap.isInitialized) {
+                val latitude = intent.getDoubleExtra("latitude", 35.0)
+                val longitude = intent.getDoubleExtra("longitude", 35.0)
+                searchLocationByLatLng(latitude, longitude)
+            }
+        }
+    }
+    */
 
     // 지도가 준비가 완료되면 호출되는 메서드
     override fun onMapReady(p0: GoogleMap) {
+        Log.d("test", "onMapReady called")
         googleMap = p0
 
         // 구글 지도의 옵션 설정을 위해 권한을 확인한다.
@@ -224,24 +248,34 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
             googleMap.isMyLocationEnabled = true
         }
 
-        //서비스에서 현 위치값을 가져오는 쓰레드 가동시키기
-        serviceRunning = true
-        thread {
-            while (serviceRunning) {
-                SystemClock.sleep(1000) //1초마다
-                myLocation = ipcService?.returnUserLocation()
 
-                runOnUiThread {
-                    if (myLocation != null) {
-                        setUserLocation(myLocation!!, true)
-                        //현 위치 로그 찍기
-                        Log.d("test", myLocation.toString())
+        /**
+        val intent = getIntent()
+        if (intent.hasExtra("isClickedByMessage")) {
+            setLocationLatLngIfThisClickedByMessage()
+        } else {
+        */
+            //서비스에서 현 위치값을 가져오는 쓰레드 가동시키기
+            serviceRunning = true
+            thread {
+                while (serviceRunning) {
+                    SystemClock.sleep(1000) //1초마다
+                    myLocation = ipcService?.returnUserLocation()
 
-                        serviceRunning = false
+                    runOnUiThread {
+                        if (myLocation != null) {
+                            setUserLocation(myLocation!!, true)
+                            //현 위치 로그 찍기
+                            Log.d("test", myLocation.toString())
+
+                            serviceRunning = false
+                        }
                     }
                 }
             }
+        /**
         }
+        */
     }
 
     fun setUserLocation(location:Location, zoom : Boolean){
@@ -356,7 +390,9 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
                                     //토스트 메시지 띄우기
                                     Toast.makeText(this@ServiceActivity, p0.title + p0.snippet , Toast.LENGTH_SHORT).show()
 
-                                    map_info = MapInfoModel(p0.position, p0.title, p0.snippet) //지도 정보 객체에 담음
+
+                                    map_info = MapInfoModel(p0.position, p0.title.orEmpty(), p0.snippet.orEmpty()) //지도 정보 객체에 담음
+                                    Log.d("share_location", "map_info 객체 만들어짐! position: ${map_info?.marker_position.toString()}")
 
                                     return false
                                 }
@@ -402,6 +438,9 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
             googleMap!!.addMarker(MarkerOptions().position(latLng).title(location))
             googleMap!!.animateCamera(CameraUpdateFactory.newLatLng(latLng))
 
+            //여기서 키보드 내리기
+            hideKeyboard()
+
             //마커 찍은 곳 장소 정보값 찍기
             //마커 클릭 리스너
             googleMap.setOnMarkerClickListener (object: GoogleMap.OnMarkerClickListener{
@@ -410,15 +449,53 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
                     //토스트 메시지 띄우기 -> snippet 은 null이고, Title, 좌표값은 가져올 수 있음
                     Toast.makeText(this@ServiceActivity, p0.title , Toast.LENGTH_SHORT).show()
 
-
                     //지도 데이터 객체에 담기
 
                     return false
                 }
             })
         }
-
     }
+
+    fun searchLocationByLatLng(latitude: Double, longitude: Double) {
+        val MAX_RESULTS = 1
+        val geoCoder = Geocoder(this)
+
+        Log.d("test_doin", "searchLocationByLatLng latitude(${latitude}), longitude(${longitude}")
+
+        try{
+            var addressList : List<Address>? = null
+            //addressList = geoCoder.getFromLocation(latitude, longitude, MAX_RESULTS)
+            addressList = geoCoder.getFromLocationName("회기역", MAX_RESULTS)
+
+            // MAX_RESULTS == 1 이니까 addressList 는 항상 길이가 1 이하
+            val address = addressList[0]
+            val latLng = LatLng(address.latitude, address.longitude)
+
+            // 가져온 주소 기반으로 다시 myLocation 설정
+            myLocation?.latitude = latLng.latitude
+            myLocation?.longitude = latLng.longitude
+
+            // 지도에 연결
+            googleMap!!.addMarker(MarkerOptions().position(latLng).title("선택된 위치"))
+            googleMap!!.animateCamera(CameraUpdateFactory.newLatLng(latLng))
+
+            hideKeyboard()
+        }catch(e:IOException){
+            e.printStackTrace()
+        }
+    }
+
+    //키보드 내리기 메소드
+    fun hideKeyboard() {
+        // 키보드 내리기
+        val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(
+            currentFocus?.windowToken,
+            InputMethodManager.HIDE_NOT_ALWAYS
+        )
+    }
+
 
 }
 

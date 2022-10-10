@@ -8,7 +8,9 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat.getSystemService
 import com.example.appgrouppurchasemaching.ServerInfo
 import com.example.appgrouppurchasemaching.board.BoardMainActivity
 import com.example.appgrouppurchasemaching.databinding.FragmentLoginBinding
@@ -127,6 +129,10 @@ class LoginFragment : Fragment() { //로그인 프래그먼트
 
                                 editor?.putInt("login_user_idx", Integer.parseInt(result_text)) //서버로부터 받은 값을 int형변환 후 put 처리
                                 editor?.commit() //실행
+
+                                // 키보드 내리기
+                                val act = activity as MainActivity
+                                act.hideKeyboard() //호출
 
                                 //화면 전환 처리
                                 val boardMainIntent = Intent(requireContext(),BoardMainActivity::class.java)

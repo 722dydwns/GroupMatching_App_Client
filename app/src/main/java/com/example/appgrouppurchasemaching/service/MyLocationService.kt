@@ -38,7 +38,7 @@ class MyLocationService : Service() { // 위치 서비스
             manager.createNotificationChannel(channel)
             val builder = NotificationCompat.Builder(this, "myLocationService")
             builder.setSmallIcon(android.R.drawable.ic_menu_mylocation)
-            builder.setContentTitle("현재 위치 측정")
+            builder.setContentTitle("현재 위치 측정 중")
             builder.setContentText("현재 위치를 측정 중 입니다.")
             val notifiaction = builder.build()
             startForeground(10, notifiaction)
@@ -64,15 +64,16 @@ class MyLocationService : Service() { // 위치 서비스
         }
 
         if(location1 != null) {
+            Log.d("test_location", "current is location1(GPS): ${location1.latitude}, ${location1.longitude}")
             getUserLocation(location1)
         }else if(location2 != null) {
+            Log.d("test_location", "current is location2(NETWORK): ${location2.latitude}, ${location2.longitude}")
             getUserLocation(location2)
         }
 
         if(manager.isProviderEnabled(LocationManager.GPS_PROVIDER) == true) {
             manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0f, locationListener)
-        }
-        if(manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) == true) {
+        } else if(manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) == true) {
             manager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0f, locationListener)
         }
 
