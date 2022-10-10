@@ -49,13 +49,13 @@ class MessageAdapter(val context : Context, val messageList : ArrayList<Message>
         }
     }
 
-    /**
+
     private var messageBtnClickListener : View.OnClickListener? = null
 
     fun setMessagebtnClickListner(listener: View.OnClickListener) {
         messageBtnClickListener = listener
     }
-    */
+
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
 
@@ -69,11 +69,11 @@ class MessageAdapter(val context : Context, val messageList : ArrayList<Message>
             SentLocationViewHolder::class.java -> {
                 val viewHolder = holder as SentLocationViewHolder
                 viewHolder.sentBtn.text = currentMessage.message
-                /**
+
                 viewHolder.sentBtn.setOnClickListener {
                     messageBtnClickListener?.onClick(viewHolder.itemView)
                 }
-                */
+
             }
             ReceiveViewHolder::class.java -> {
                 val viewHolder = holder as ReceiveViewHolder
@@ -82,11 +82,11 @@ class MessageAdapter(val context : Context, val messageList : ArrayList<Message>
             ReceiveLocationViewHolder::class.java -> {
                 val viewHolder = holder as ReceiveLocationViewHolder
                 viewHolder.receiveBtn.text = currentMessage.message
-                /**
+
                 viewHolder.receiveBtn.setOnClickListener {
                     messageBtnClickListener?.onClick(viewHolder.itemView)
                 }
-                */
+
             }
         }
     }

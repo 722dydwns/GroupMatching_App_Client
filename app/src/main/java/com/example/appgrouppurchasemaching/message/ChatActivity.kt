@@ -9,6 +9,7 @@ import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appgrouppurchasemaching.R
@@ -82,6 +83,13 @@ class ChatActivity : AppCompatActivity() { //'채팅' 액티비티 화면
         sendButton = binding.sendButton
         messageList = ArrayList()
         messageAdapter = MessageAdapter(applicationContext, messageList)
+        messageAdapter.setMessagebtnClickListner( //제안 장소 버튼 클릭 시
+            View.OnClickListener {
+                Toast.makeText(this, "최종 매칭 장소가 선택되었습니다.", Toast.LENGTH_SHORT).show()
+
+            }
+
+        )
         /**
         messageAdapter.setMessagebtnClickListner(
             View.OnClickListener {
