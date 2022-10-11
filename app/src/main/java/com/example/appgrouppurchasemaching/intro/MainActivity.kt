@@ -127,6 +127,7 @@ class MainActivity : AppCompatActivity() { //main 액티비티
         trans.commit() //위의 설정 적용
     }
 
+    //키보드 내리는 메소드
     fun hideKeyboard() {
         // 키보드 내리기
         val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager

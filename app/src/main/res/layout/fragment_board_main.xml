@@ -13,9 +13,11 @@
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/board_main_recycler"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/board_main_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+
 
 </LinearLayout>

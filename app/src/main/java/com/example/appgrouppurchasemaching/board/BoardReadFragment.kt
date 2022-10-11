@@ -232,10 +232,12 @@ class BoardReadFragment : Fragment() { //게시글 읽기 프래그먼트 화면
                  //   Log.d("Test", dataModel.key.toString())
                     val likeUserKey = dataModel.key.toString()
 
-                    //내가 원하는 대상이 나를 좋아하고 있으면
+                    //내가 원하는 대상 == 나를 원하는 대상
                     if(likeUserKey.equals(MyUid)) {
-                        Log.d("Test", likeUserKey)
-                        Toast.makeText(activity, "매칭 시도", Toast.LENGTH_SHORT).show()
+                      //  Log.d("Test", likeUserKey)
+                        //알림 띄우기
+
+
                     }
                 }
             }

@@ -1,6 +1,8 @@
 package com.example.appgrouppurchasemaching.message
 
+import android.app.AlertDialog
 import android.app.Service
+import android.content.DialogInterface
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -10,6 +12,7 @@ import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appgrouppurchasemaching.R
@@ -78,6 +81,7 @@ class ChatActivity : AppCompatActivity() { //'채팅' 액티비티 화면
             true
         }
 
+
         chatRecyclerView = binding.chatRecyclerView
         messageBox = binding.messageBox
         sendButton = binding.sendButton
@@ -85,11 +89,24 @@ class ChatActivity : AppCompatActivity() { //'채팅' 액티비티 화면
         messageAdapter = MessageAdapter(applicationContext, messageList)
         messageAdapter.setMessagebtnClickListner( //제안 장소 버튼 클릭 시
             View.OnClickListener {
-                Toast.makeText(this, "최종 매칭 장소가 선택되었습니다.", Toast.LENGTH_SHORT).show()
+                val dialogBuilder = AlertDialog.Builder(this)
+                dialogBuilder.setTitle("약속 장소 최종 선택")
+                dialogBuilder.setMessage("이 주소로 약속 정소를 최종 선택하시겠습니까 ?")
+                dialogBuilder.setPositiveButton("최종 매칭"){ dialogInterface: DialogInterface, i: Int ->
+                    //이벤트 처리
+                }
+                dialogBuilder.setNegativeButton("취소"){ dialogInterface: DialogInterface, i: Int ->
+                    //이벤트 처리
+                }
+                dialogBuilder.setNeutralButton("잠깐만요"){ dialogInterface: DialogInterface, i: Int ->
+                    //이벤트 처리
+                }
+                dialogBuilder.show()
 
             }
 
         )
+
         /**
         messageAdapter.setMessagebtnClickListner(
             View.OnClickListener {
@@ -173,8 +190,11 @@ class ChatActivity : AppCompatActivity() { //'채팅' 액티비티 화면
                         .setValue(messageObject)
                 }
             messageBox.setText("")
+
         }
 
 
     }
+
+
 }
