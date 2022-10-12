@@ -26,7 +26,7 @@ class MyLikeListActivity : AppCompatActivity() { //'내가' 원하는 매칭 대
     //내가 좋아요한 대상의 정보 데이터 모델
     private val likeUserList = mutableListOf<UserDataModel>()
 //    private val likeUserListUid = mutableListOf<String>() //Uid
-    private val likeUserMatchingMap = mutableMapOf<String, FirebaseRef.Matching>() // Key: Uid, Value: Matching
+    private val likeUserMatchingMap = mutableMapOf<String, Matching>() // Key: Uid, Value: Matching
 
     lateinit var listviewAdapter : ListViewAdapter
 
@@ -119,7 +119,7 @@ class MyLikeListActivity : AppCompatActivity() { //'내가' 원하는 매칭 대
                 for (dataModel in dataSnapshot.children) {
                     // 내가 좋아요 한 사람들의 uid가 likeUserList에 들어있음
                     val otherUserUid = dataModel.key.toString()
-                    val matchingData = dataModel.getValue(FirebaseRef.Matching::class.java)
+                    val matchingData = dataModel.getValue(Matching::class.java)
 
                     likeUserMatchingMap.put(otherUserUid, matchingData!!)
                 }

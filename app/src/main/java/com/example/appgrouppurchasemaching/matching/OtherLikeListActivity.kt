@@ -31,7 +31,7 @@ class OtherLikeListActivity : AppCompatActivity() { //'나를' 원하는 매칭 
     //나를 좋아요한 대상들 정보 데이터 모델
     private val OtherLikeMeList = mutableListOf<UserDataModel>()
 //    private val OtherLikeList = mutableListOf<String>()
-    private val OtherLikeMatchingMap = mutableMapOf<String, FirebaseRef.Matching>()
+    private val OtherLikeMatchingMap = mutableMapOf<String, Matching>()
 
     lateinit var listviewAdapter : ListViewAdapter
 
@@ -139,18 +139,18 @@ class OtherLikeListActivity : AppCompatActivity() { //'나를' 원하는 매칭 
                      * 현재 함수 아래에서 addValueEventListener 를 통해 지금 이 리스너(postListener)를 등록하는 코드를 보면,
                      * userWantMatchingRef 를 root로 모든 데이터를 가져오고 있다.
                      * userWantMatchingRef 의 트리구조는
-                     * root(userWantMatching) - {매칭 원하는 사람 UID} - {글 올린 사람 UID} - {데이터 구조체(FirebaseRef.Matching)} 이다.
+                     * root(userWantMatching) - {매칭 원하는 사람 UID} - {글 올린 사람 UID} - {데이터 구조체(Matching)} 이다.
                      *
                      * 현재 콜백(onDataChange) 에서 parameter로 넘어오는 DataSnapshot 은
                      * 위에 적어둔 트리구조를 통째로 가지고 있다.
                      * 즉, dataSnapshot.key 를 로그찍어보면 아마 "userWantMaching" 이 찍힐것이다. (이걸 몰랐다)
                      *
                      * 따라서 dataSnapshot.children 객체들 (dataModel) 은
-                     * {매칭 원하는 사람 UID} - {글 올린 사람 UID} - {데이터 구조체(FirebaseRef.Matching)}
+                     * {매칭 원하는 사람 UID} - {글 올린 사람 UID} - {데이터 구조체(Matching)}
                      * 형태를 갖고 있고, 여기서 key 는 {매칭 원하는 사람 UID} 가 된다.
                      *
                      * 기존에 내가 실수하던 부분은 dataModel.child(key) 에서 key 값으로 {매칭 원하는 사람 UID}를 쓰고 있던 점이다.
-                     * 이미 dataModel 의 value 부분은 {글 올린 사람 UID} - {데이터 구조체(FirebaseRef.Matching)} 형태이기 때문에,
+                     * 이미 dataModel 의 value 부분은 {글 올린 사람 UID} - {데이터 구조체(Matching)} 형태이기 때문에,
                      * 엉뚱한 UID로 child 검색 후 getValue() 하려고 하니 자꾸 null 이 들어왔던 것.
                      *
                      * dataModel.child(key) 에서 key 값으로 {글 올린 사람 UID}, 즉, 내 UID 를 사용하여
@@ -162,7 +162,7 @@ class OtherLikeListActivity : AppCompatActivity() { //'나를' 원하는 매칭 
                      */
                     val otherUid = dataModel.key.toString() // 상대방 uid
                     if (dataModel.hasChild(uid)) { // 현재 스냅샷에 내 UID 를 들고있는 value가 있는지 확인
-                        val matchingData = dataModel.child(uid).getValue(FirebaseRef.Matching::class.java)
+                        val matchingData = dataModel.child(uid).getValue(Matching::class.java)
                         OtherLikeMatchingMap.put(otherUid, matchingData!!)
                     }
                 }
