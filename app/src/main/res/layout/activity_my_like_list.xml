@@ -30,7 +30,7 @@
     <ListView
         android:id="@+id/userListView"
         android:layout_width="match_parent"
-        android:layout_height="710dp"
+        android:layout_height="579dp"
         android:layout_marginStart="0dp"
         android:layout_marginBottom="72dp" />
 </LinearLayout>

@@ -4,11 +4,9 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.widget.ListView
 import com.example.appgrouppurchasemaching.R
 import com.example.appgrouppurchasemaching.board.BoardMainActivity
 import com.example.appgrouppurchasemaching.databinding.ActivityMyLikeListBinding
-import com.example.appgrouppurchasemaching.intro.MainActivity
 import com.example.appgrouppurchasemaching.message.ChatActivity
 import com.example.appgrouppurchasemaching.utils.FirebaseAuthUtils
 import com.example.appgrouppurchasemaching.utils.FirebaseRef
@@ -27,7 +25,8 @@ class MyLikeListActivity : AppCompatActivity() { //'내가' 원하는 매칭 대
 
     //내가 좋아요한 대상의 정보 데이터 모델
     private val likeUserList = mutableListOf<UserDataModel>()
-    private val likeUserListUid = mutableListOf<String>() //Uid
+//    private val likeUserListUid = mutableListOf<String>() //Uid
+    private val likeUserMatchingMap = mutableMapOf<String, FirebaseRef.Matching>() // Key: Uid, Value: Matching
 
     lateinit var listviewAdapter : ListViewAdapter
 
@@ -43,9 +42,11 @@ class MyLikeListActivity : AppCompatActivity() { //'내가' 원하는 매칭 대
         getMyLikeList() //내가 좋아요한 애들 목록 얻기
 
         //리스트뷰 Adapter연결
-        val userListView = findViewById<ListView>(R.id.userListView)
+        val userListView = binding.userListView  // findViewById<ListView>(R.id.userListView)
         listviewAdapter = ListViewAdapter(this, likeUserList)
         userListView.adapter = listviewAdapter
+
+
 
         //내가 좋아요한 유저 클릭 시, 메시지 보내기 창 떠서 메시지 보낼 수 있게 하고
         //상대방에게 알림 띄워주고
@@ -59,7 +60,6 @@ class MyLikeListActivity : AppCompatActivity() { //'내가' 원하는 매칭 대
 
             intent.putExtra("name", OtherUserName)
             intent.putExtra("uid",OtherUserUid)
-
             startActivity(intent)
 
         }
@@ -118,7 +118,10 @@ class MyLikeListActivity : AppCompatActivity() { //'내가' 원하는 매칭 대
 
                 for (dataModel in dataSnapshot.children) {
                     // 내가 좋아요 한 사람들의 uid가 likeUserList에 들어있음
-                    likeUserListUid.add(dataModel.key.toString())
+                    val otherUserUid = dataModel.key.toString()
+                    val matchingData = dataModel.getValue(FirebaseRef.Matching::class.java)
+
+                    likeUserMatchingMap.put(otherUserUid, matchingData!!)
                 }
                 getUserDataList() //사용자 데이터를 UserDataModel 타입으로 얻기
             }
@@ -144,10 +147,14 @@ class MyLikeListActivity : AppCompatActivity() { //'내가' 원하는 매칭 대
                     val user = dataModel.getValue(UserDataModel::class.java)
 
                     // 전체 유저중에 내가 좋아요한 사람들 '정보' 이면서 나 자신은 아닌 대상만 add함
-                    if(likeUserListUid.contains(user?.uid) && user?.uid != uid) {
+//                    if(likeUserListUid.contains(user?.uid) && user?.uid != uid) {
+//                        likeUserList.add(user!!)
+//                    }
+                    if (likeUserMatchingMap.containsKey(user?.uid) && user?.uid != uid) {
+                        user!!.isMatch = likeUserMatchingMap[user!!.uid]!!.isMatch
                         likeUserList.add(user!!)
                     }
-                    likeUserList.reverse() //역순
+//                    likeUserList.reverse() //역순
                 }
                 listviewAdapter.notifyDataSetChanged() //다시 데이터 그려주기 리스트뷰에
             }

@@ -20,6 +20,7 @@ import com.example.appgrouppurchasemaching.databinding.ActivityChatBinding
 import com.example.appgrouppurchasemaching.matching.MyLikeListActivity
 import com.example.appgrouppurchasemaching.service.MapInfoModel
 import com.example.appgrouppurchasemaching.service.ServiceActivity
+import com.example.appgrouppurchasemaching.utils.FirebaseRef
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 
@@ -81,7 +82,6 @@ class ChatActivity : AppCompatActivity() { //'채팅' 액티비티 화면
             true
         }
 
-
         chatRecyclerView = binding.chatRecyclerView
         messageBox = binding.messageBox
         sendButton = binding.sendButton
@@ -94,12 +94,28 @@ class ChatActivity : AppCompatActivity() { //'채팅' 액티비티 화면
                 dialogBuilder.setMessage("이 주소로 약속 정소를 최종 선택하시겠습니까 ?")
                 dialogBuilder.setPositiveButton("최종 매칭"){ dialogInterface: DialogInterface, i: Int ->
                     //이벤트 처리
+                    /**
+                     * DB 상에 상대 UID, 내 UID, 매칭 장소 주소값(아직 적용 x) 등의 데이터 올리는 코드.
+                     *
+                     * 아래 코드의 parameter를 잘 보면
+                     * waterUid(매칭 원하는 사람) 에 receiverUid 를,
+                     * wantedUid(글 올린 사람) 에 senderUid 를 대입했다.
+                     *
+                     * 그 이유는 최종 매칭 버튼은 "상대가 제안한 장소를 수락" 하는 시나리오만 있다고 가정하고 구현했기 때문이다.
+                     * 내가 제안한 장소를 내가 수락하는 것은 좀 이상하다.
+                     *
+                     * ChatActivity namespace에서는 메세지나 송수신자를 구분할 수 없으므로,
+                     * listener 는 단순하게 아래 기능만 구현하고
+                     * MessageAdapter 에서 이 listener를 receiveBtn 에만 적용하는 방식으로 구현한다.
+                     */
+                    FirebaseRef.setUserMatchingSuccess(receiverUid!!, senderUid!!)
                 }
                 dialogBuilder.setNegativeButton("취소"){ dialogInterface: DialogInterface, i: Int ->
-                    //이벤트 처리
+                    //이벤트 처리 -> 창 닫기
                 }
                 dialogBuilder.setNeutralButton("잠깐만요"){ dialogInterface: DialogInterface, i: Int ->
                     //이벤트 처리
+                    // -> 다시 약속을 정하는 액션을 여기서 설정
                 }
                 dialogBuilder.show()
 

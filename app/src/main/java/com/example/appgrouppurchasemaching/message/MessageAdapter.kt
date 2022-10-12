@@ -71,7 +71,14 @@ class MessageAdapter(val context : Context, val messageList : ArrayList<Message>
                 viewHolder.sentBtn.text = currentMessage.message
 
                 viewHolder.sentBtn.setOnClickListener {
-                    messageBtnClickListener?.onClick(viewHolder.itemView)
+                    /**
+                     * 내가 보낸 장소 제안 버튼을 눌렀을 때의 동작
+                     *
+                     * 단순히 로그만 찍는다.
+                     *
+                     * @see ChatActivity.kt messageAdapter.setMessagebtnClickListner 리스너 등록하는 부분 설명
+                     */
+                    Log.d("test", "sentBtn Clicked")
                 }
 
             }
@@ -84,6 +91,7 @@ class MessageAdapter(val context : Context, val messageList : ArrayList<Message>
                 viewHolder.receiveBtn.text = currentMessage.message
 
                 viewHolder.receiveBtn.setOnClickListener {
+                    Log.d("test", "receiveBtn Clicked")
                     messageBtnClickListener?.onClick(viewHolder.itemView)
                 }
 

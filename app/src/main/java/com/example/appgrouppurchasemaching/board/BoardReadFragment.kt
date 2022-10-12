@@ -194,8 +194,8 @@ class BoardReadFragment : Fragment() { //게시글 읽기 프래그먼트 화면
                 for (dataModel in dataSnapshot.children) {
                     val user = dataModel.getValue(UserDataModel::class.java)
                     //방금 좋아요 누른 사용자 닉네임이 동일한 애의 회원에 한해서
-                    if (user?.nickname.toString().equals(UserNickName)
-                    ) { //회원 데이터 중 해당 닉네임 갖는 데이터 존재할 경우
+                    if (user?.nickname.toString().equals(UserNickName)) {
+                        //회원 데이터 중 해당 닉네임 갖는 데이터 존재할 경우
 
                         val act = activity as BoardMainActivity
                         act.usersDataList.add(user!!) //여기서 액티비티 단위로 관리하는 리스트 변수에 add에 담음
@@ -217,7 +217,8 @@ class BoardReadFragment : Fragment() { //게시글 읽기 프래그먼트 화면
     private fun userLikeOtherUser(myUid: String, otherUid: String) {
 
         //나의 uid를 상위에, 하위에는 내가 좋아요한 uid 회원들을 나열하는 구조로 DB에 저장
-        FirebaseRef.userWantMatchingRef.child(myUid).child(otherUid).setValue("true")
+//        FirebaseRef.userWantMatchingRef.child(myUid).child(otherUid).setValue("true")
+        FirebaseRef.addUserMatching(myUid, otherUid)
 
         getOtherUserLikeList(otherUid) // 내가 좋아요한 상대의 좋아요 리스트 불러오기
     }
