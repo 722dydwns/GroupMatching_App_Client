@@ -21,6 +21,7 @@ import com.example.appgrouppurchasemaching.matching.MyLikeListActivity
 import com.example.appgrouppurchasemaching.service.MapInfoModel
 import com.example.appgrouppurchasemaching.service.ServiceActivity
 import com.example.appgrouppurchasemaching.utils.FirebaseRef
+import com.example.appgrouppurchasemaching.utils.FirebaseRef.Companion.CHAT_MESSAGE
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 
@@ -33,7 +34,6 @@ class ChatActivity : AppCompatActivity() { //'채팅' 액티비티 화면
     private lateinit var sendButton : ImageView
     private lateinit var messageAdapter: MessageAdapter
     private lateinit var messageList : ArrayList<Message>
-    private lateinit var mDbRef : DatabaseReference
 
     var receiverRoom : String? = null
     var senderRoom : String? = null
@@ -60,8 +60,6 @@ class ChatActivity : AppCompatActivity() { //'채팅' 액티비티 화면
 
             startActivity(intent)
         }
-
-        mDbRef = FirebaseDatabase.getInstance().getReference()
 
         senderRoom = receiverUid + senderUid
         receiverRoom = senderUid + receiverUid
@@ -147,7 +145,7 @@ class ChatActivity : AppCompatActivity() { //'채팅' 액티비티 화면
         chatRecyclerView.adapter = messageAdapter
 
         //리사이클러뷰에 세팅
-        mDbRef.child("chats").child(senderRoom!!).child("messages")
+        FirebaseRef.chatsRef.child(senderRoom!!).child(CHAT_MESSAGE)
             .addValueEventListener(object: ValueEventListener{
                 override fun onDataChange(snapshot: DataSnapshot) {
 
@@ -180,14 +178,7 @@ class ChatActivity : AppCompatActivity() { //'채팅' 액티비티 화면
                 messageObject.setShareLocation(mapInfo.marker_position!!.latitude, mapInfo.marker_position!!.longitude)
                 Log.d("share_location", "messageObject.message: ${messageObject.message}, messageObject.type: ${messageObject.type}")
 
-                mDbRef.child("chats").child(senderRoom!!).child("messages").push()
-                    .setValue(messageObject).addOnSuccessListener {
-                        Log.d("share_location", "senderRoom 에는 보내짐")
-                        mDbRef.child("chats").child(receiverRoom!!).child("messages").push()
-                            .setValue(messageObject).addOnSuccessListener {
-                                Log.d("share_location", "receiverRoom 에도 보내짐")
-                            }
-                    }
+                FirebaseRef.pushMessage(senderRoom!!, receiverRoom!!, messageObject)
             }
         }
 
@@ -199,12 +190,7 @@ class ChatActivity : AppCompatActivity() { //'채팅' 액티비티 화면
             }
 
             val messageObject = Message(message, senderUid)
-
-            mDbRef.child("chats").child(senderRoom!!).child("messages").push()
-                .setValue(messageObject).addOnSuccessListener {
-                    mDbRef.child("chats").child(receiverRoom!!).child("messages").push()
-                        .setValue(messageObject)
-                }
+            FirebaseRef.pushMessage(senderRoom!!, receiverRoom!!, messageObject)
             messageBox.setText("")
 
         }
