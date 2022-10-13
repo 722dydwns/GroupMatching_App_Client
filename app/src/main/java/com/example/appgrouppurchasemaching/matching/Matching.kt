@@ -10,6 +10,7 @@ package com.example.appgrouppurchasemaching.matching
  * @property[user1Uid] 매칭할/된 사람 1
  * @property[user2Uid] 매칭할/된 사람 2
  * @property[isMatch] 매칭 성공 여부. 기본값 false
+ * @property[boardIdx] 매칭한 게시물 IDX. (nullable) <-- 멤버만 추가하고 관련 기능 아직 추가 x
  */
 class Matching() {
     constructor(user1Uid: String, user2Uid: String) : this() {
@@ -19,6 +20,7 @@ class Matching() {
     var user1Uid: String = ""
     var user2Uid: String = ""
     var isMatch: Boolean = false
+    var boardIdx: Int? = null
 
     fun setMatchSuccess() {
         isMatch = true
@@ -26,6 +28,6 @@ class Matching() {
 
     @Override
     override fun toString() : String {
-        return "{\"user1Uid\": ${user1Uid}, \"user2Uid\": ${user2Uid}, \"isMatch\": ${isMatch}}"
+        return "{\"user1Uid\": ${user1Uid}, \"user2Uid\": ${user2Uid}, \"isMatch\": ${isMatch}, \"boardIdx\": ${boardIdx?.toString()}}"
     }
 }

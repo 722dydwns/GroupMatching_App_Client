@@ -30,7 +30,6 @@ class OtherLikeListActivity : AppCompatActivity() { //'나를' 원하는 매칭 
 
     //나를 좋아요한 대상들 정보 데이터 모델
     private val OtherLikeMeList = mutableListOf<UserDataModel>()
-//    private val OtherLikeList = mutableListOf<String>()
     private val OtherLikeMatchingMap = mutableMapOf<String, Matching>()
 
     lateinit var listviewAdapter : ListViewAdapter
@@ -96,18 +95,13 @@ class OtherLikeListActivity : AppCompatActivity() { //'나를' 원하는 매칭 
 
     //사용자 '정보 데이터' 리스트
     private fun getUserDataList(){
-
         val postListener = object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-
                 OtherLikeMeList.clear()
 
                 for (dataModel in dataSnapshot.children) {
                     val user = dataModel.getValue(UserDataModel::class.java)
 
-//                    if(OtherLikeList.contains(user?.uid) && user?.uid != uid ) {
-//                        OtherLikeMeList.add(user!!)
-//                    }
                     if (OtherLikeMatchingMap.containsKey(user?.uid) && user?.uid != uid) {
                         user!!.isMatch = OtherLikeMatchingMap[user?.uid]!!.isMatch
                         OtherLikeMeList.add(user!!)
@@ -115,7 +109,6 @@ class OtherLikeListActivity : AppCompatActivity() { //'나를' 원하는 매칭 
 //                    OtherLikeMeList.reverse()
                 }
                 listviewAdapter.notifyDataSetChanged() //다시 데이터 그려주기 리스트뷰에
-
             }
 
             override fun onCancelled(databaseError: DatabaseError) {

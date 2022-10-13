@@ -89,7 +89,7 @@ class ChatActivity : AppCompatActivity() { //'채팅' 액티비티 화면
             View.OnClickListener {
                 val dialogBuilder = AlertDialog.Builder(this)
                 dialogBuilder.setTitle("약속 장소 최종 선택")
-                dialogBuilder.setMessage("이 주소로 약속 정소를 최종 선택하시겠습니까 ?")
+                dialogBuilder.setMessage("이 주소로 약속 장소를 최종 선택하시겠습니까 ?")
                 dialogBuilder.setPositiveButton("최종 매칭"){ dialogInterface: DialogInterface, i: Int ->
                     //이벤트 처리
                     /**
@@ -107,6 +107,9 @@ class ChatActivity : AppCompatActivity() { //'채팅' 액티비티 화면
                      * MessageAdapter 에서 이 listener를 receiveBtn 에만 적용하는 방식으로 구현한다.
                      */
                     FirebaseRef.setUserMatchingSuccess(receiverUid!!, senderUid!!)
+
+
+                    // TODO: 채팅에서 최종 매칭 누르고 나면, 게시글에서도 매칭이 됐는지 안됐는지 Flag가 떠야될거같음
                 }
                 dialogBuilder.setNegativeButton("취소"){ dialogInterface: DialogInterface, i: Int ->
                     //이벤트 처리 -> 창 닫기
@@ -192,11 +195,6 @@ class ChatActivity : AppCompatActivity() { //'채팅' 액티비티 화면
             val messageObject = Message(message, senderUid)
             FirebaseRef.pushMessage(senderRoom!!, receiverRoom!!, messageObject)
             messageBox.setText("")
-
         }
-
-
     }
-
-
 }
