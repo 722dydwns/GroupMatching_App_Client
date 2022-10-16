@@ -22,13 +22,15 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import com.example.appgrouppurchasemaching.R
 import com.example.appgrouppurchasemaching.ServerInfo
+import com.example.appgrouppurchasemaching.board.AttachmentSizeUtil.Companion.calculateSampleSize
+import com.example.appgrouppurchasemaching.board.AttachmentSizeUtil.Companion.decodeSampledBitmapFromResource
+import com.example.appgrouppurchasemaching.board.AttachmentSizeUtil.Companion.maxHeight
+import com.example.appgrouppurchasemaching.board.AttachmentSizeUtil.Companion.maxWidth
 import com.example.appgrouppurchasemaching.databinding.FragmentBoardWriteBinding
-import okhttp3.FormBody
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
-import okio.Buffer
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.concurrent.thread
@@ -171,9 +173,13 @@ class BoardWriteFragment : Fragment() {//글쓰기 프래그먼트 화면
                         var file : File? = null
                         //사용자가 선택한 이미지 파일 존재하는 경우에 한해서
                         if(uploadImage != null) {
+                            Log.d("test", "uploadImage.width(${uploadImage?.width}), uploadImage.height(${uploadImage?.height}), uploadImage.allocationByteCount(${uploadImage?.allocationByteCount})")
+
                             val filePath = requireContext().getExternalFilesDir(null).toString()
                             val fileName = "/temp_${System.currentTimeMillis()}.jpg"
                             val picPath = "$filePath/$fileName"
+                            Log.d("test", "picPath: $picPath")
+
                             file = File(picPath)
                             val fos = FileOutputStream(file)
                             uploadImage?.compress(Bitmap.CompressFormat.JPEG, 100, fos)
@@ -194,7 +200,9 @@ class BoardWriteFragment : Fragment() {//글쓰기 프래그먼트 화면
                         val request = Request.Builder().url(site).post(formBody).build()
                         //요청 반환값은 response 변수로 받음
                         val response = client.newCall(request).execute()
+                        Log.d("test", "request call execute")
 
+                        Log.d("test", "response.isSuccessful: ${response.isSuccessful}")
                         if(response.isSuccessful == true){ //서버 통신 성공 시,
                             //서버가 보내온 응답 결과 받음 = read_content_idx값
                             val resultText = response.body?.string()!!.trim()
@@ -258,10 +266,34 @@ class BoardWriteFragment : Fragment() {//글쓰기 프래그먼트 화면
     //재정의
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+
+        /**
+         * 카메라 혹은 갤러리 공통 Intent 를 통해 결과가 넘어오는 callback 인 것 같다.
+         * 이미지 크기가 너무 크면 [ImageView.setImageBitmap] 로 이미지를 화면에 그릴 때
+         * [java.lang.RuntimeException: Canvas: trying to draw too large bitmap] 예외가 발생하며 앱이 종료된다.
+         *
+         * 그리고 큰 이미지를 서버로 전달하면, 서버에서 네트워크를 통해 이미지를 받아오는 시간이 너무 오래걸려서
+         * 서버가 소켓 연결을 끊는다.
+         * -> 서버와 클라이언트 의 request time out 을 조절해도 되지만, 아래와 같이 수정하면 더 간단히 해결된다.
+         *
+         * 해결방법 :
+         * 아예 이미지를 불러올 때 최대 크기[AttachmentsSize] 이하로 샘플링하여 불러오도록 방어로직을 구성했다.
+         * 이렇게 하면 아무리 큰 이미지를 불러와도 ImageView에 잘 그려지고 서버로도 빠르게 정상적으로 전송된다.
+         *
+         * 최대 width: 1500, height: 1500 으로 설정했을 때(현재) 40MB 크기의 이미지를 불러와도 정상 동작하는 것을 확인했다.
+         *
+         * 단, 서버로의 전송 속도는 네트워크 상태에 따라 다를 수 있다.
+         * 커피빈에서는 500kB의 이미지도 서버로 전송하는데 소켓 연결이 끊겼었다.
+         */
+
         when (requestCode) {
             1 -> {
                 if (resultCode == Activity.RESULT_OK) {
-                    uploadImage = BitmapFactory.decodeFile(contentUri.path)
+                    /**
+                     * BitmapFactory.decodeFile 할 때, 이미지를 작게 샘플링하여 decode한다.
+                     * 이미지 최대 사이즈는 전역상수로 선언하여 사용한다. [AttachmentsSize]
+                     */
+                    uploadImage = decodeSampledBitmapFromResource(contentUri.path!!, maxWidth, maxHeight)
                     binding.boardWriteImage.setImageBitmap(uploadImage) //이미지뷰에 세팅
 
                     val file = File(contentUri.path)
@@ -275,9 +307,18 @@ class BoardWriteFragment : Fragment() {//글쓰기 프래그먼트 화면
 
                     if (uri != null) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                            val source =
-                                ImageDecoder.createSource(activity?.contentResolver!!, uri)
-                            uploadImage = ImageDecoder.decodeBitmap(source)
+                            val source = ImageDecoder.createSource(activity?.contentResolver!!, uri)
+                            /**
+                             * ImageDecoder.decodeBitmap 할 때, 이미지를 작게 샘플링하여 decode한다.
+                             * 이미지 최대 사이즈는 전역상수로 선언하여 사용한다. [AttachmentsSize]
+                             * @see[https://blog.stylingandroid.com/imagedecoder-error-handling-cropping-scaling/]
+                             */
+                            uploadImage = ImageDecoder.decodeBitmap(source,
+                                ImageDecoder.OnHeaderDecodedListener { decoder, info, source ->
+                                    decoder.setTargetSampleSize(
+                                        calculateSampleSize(info.size.width, info.size.height, maxWidth, maxHeight)
+                                    )
+                            })
                             binding.boardWriteImage.setImageBitmap(uploadImage) //이미지 뷰에 세팅
                         } else {
                             val cursor =
@@ -287,14 +328,20 @@ class BoardWriteFragment : Fragment() {//글쓰기 프래그먼트 화면
                                 // 이미지 경로를 가져온다.
                                 val index = cursor.getColumnIndex(MediaStore.Images.Media.DATA)
                                 val source = cursor.getString(index)
-                                uploadImage = BitmapFactory.decodeFile(source)
+                                /**
+                                 * BitmapFactory.decodeFile 할 때, 이미지를 작게 샘플링하여 decode한다.
+                                 * 이미지 최대 사이즈는 전역상수로 선언하여 사용한다. [AttachmentsSize]
+                                 */
+                                uploadImage = decodeSampledBitmapFromResource(source, maxWidth, maxHeight)
                                 binding.boardWriteImage.setImageBitmap(uploadImage)
                             }
                         }
                     }
                 }
             }
+            else -> {
+                Log.w("BoardWriteFragment.kt", "Unknown requestCode($requestCode)")
+            }
         }
     }
-
 }

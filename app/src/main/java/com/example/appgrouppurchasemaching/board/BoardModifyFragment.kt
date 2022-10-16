@@ -22,6 +22,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import com.example.appgrouppurchasemaching.R
 import com.example.appgrouppurchasemaching.ServerInfo
+import com.example.appgrouppurchasemaching.board.AttachmentSizeUtil.Companion.calculateSampleSize
+import com.example.appgrouppurchasemaching.board.AttachmentSizeUtil.Companion.decodeSampledBitmapFromResource
+import com.example.appgrouppurchasemaching.board.AttachmentSizeUtil.Companion.maxHeight
+import com.example.appgrouppurchasemaching.board.AttachmentSizeUtil.Companion.maxWidth
 import com.example.appgrouppurchasemaching.databinding.FragmentBoardModifyBinding
 import okhttp3.*
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -150,6 +154,9 @@ class BoardModifyFragment : Fragment() { //게시글 수정 프래그먼트
                         //이미지 데이터 세팅
                         var file: File? = null
                         if (uploadImage != null) { //이미지 null값 아니라면
+                            Log.d("test", "uploadImage.width(${uploadImage?.width}), uploadImage.height(${uploadImage?.height}), uploadImage.allocationByteCount(${uploadImage?.allocationByteCount})")
+
+
                             val filePath = requireContext().getExternalFilesDir(null).toString()
                             val fileName = "/temp_${System.currentTimeMillis()}.jpg"
                             val picPath = "$filePath/$fileName"
@@ -263,10 +270,16 @@ class BoardModifyFragment : Fragment() { //게시글 수정 프래그먼트
     //재정의
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+
+        /**
+         * 게시물 쓰기 [onActivityResult] 쪽에 구현 설명 주석 달아놓음
+         * @see BoardWriteFragment.onActivityResult
+         */
+
         when (requestCode) {
             1 -> {
                 if (resultCode == Activity.RESULT_OK) {
-                    uploadImage = BitmapFactory.decodeFile(contentUri.path)
+                    uploadImage = decodeSampledBitmapFromResource(contentUri.path!!, maxWidth, maxHeight)
                     binding.boardModifyImage.setImageBitmap(uploadImage) //이미지뷰에 세팅
                     binding.boardModifyImage.visibility = View.VISIBLE //이미지 보이게
 
@@ -282,7 +295,12 @@ class BoardModifyFragment : Fragment() { //게시글 수정 프래그먼트
                     if (uri != null) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                             val source = ImageDecoder.createSource(activity?.contentResolver!!, uri)
-                            uploadImage = ImageDecoder.decodeBitmap(source)
+                            uploadImage = ImageDecoder.decodeBitmap(source,
+                                ImageDecoder.OnHeaderDecodedListener { decoder, info, source ->
+                                    decoder.setTargetSampleSize(
+                                        calculateSampleSize(info.size.width, info.size.height, maxWidth, maxHeight)
+                                    )
+                                })
                             binding.boardModifyImage.setImageBitmap(uploadImage) //이미지 뷰에 세팅
                             binding.boardModifyImage.visibility = View.VISIBLE //이미지 보이게
                         } else {
@@ -293,7 +311,7 @@ class BoardModifyFragment : Fragment() { //게시글 수정 프래그먼트
                                 // 이미지 경로를 가져온다.
                                 val index = cursor.getColumnIndex(MediaStore.Images.Media.DATA)
                                 val source = cursor.getString(index)
-                                uploadImage = BitmapFactory.decodeFile(source)
+                                uploadImage = decodeSampledBitmapFromResource(source, maxWidth, maxHeight)
                                 binding.boardModifyImage.setImageBitmap(uploadImage)
                                 binding.boardModifyImage.visibility = View.VISIBLE //이미지 보이게
                             }
@@ -303,8 +321,4 @@ class BoardModifyFragment : Fragment() { //게시글 수정 프래그먼트
             }
         }
     }
-
-
-
-
 }
