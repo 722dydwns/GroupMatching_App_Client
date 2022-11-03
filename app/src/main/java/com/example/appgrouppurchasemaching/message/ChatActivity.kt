@@ -124,26 +124,6 @@ class ChatActivity : AppCompatActivity() { //'채팅' 액티비티 화면
 
         )
 
-        /**
-        messageAdapter.setMessagebtnClickListner(
-            View.OnClickListener {
-                Log.d("share_location", "message btn click listener")
-
-                val currentMessage = messageList[0]
-
-                Log.d("share_location", "currentMessage: ${currentMessage}")
-
-                val intent = Intent(this, ServiceActivity::class.java)
-                intent.putExtra("latitude", currentMessage.latitude)
-                intent.putExtra("longitude", currentMessage.longitude)
-                intent.putExtra("isClickedByMessage", true)
-                //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                startActivity(intent)
-            }
-        )
-        */
-        //messageAdapter = MessageAdapter(this, messageList)
-
         chatRecyclerView.layoutManager = LinearLayoutManager(this)
         chatRecyclerView.adapter = messageAdapter
 

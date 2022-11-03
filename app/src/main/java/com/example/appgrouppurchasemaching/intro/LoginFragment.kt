@@ -87,11 +87,6 @@ class LoginFragment : Fragment() { //로그인 프래그먼트
 
             //-> 서버 통신 작업 수행
             thread {
-//                val client = OkHttpClient().newBuilder()
-//                    .connectTimeout(5000, TimeUnit.MILLISECONDS) //
-//                    .writeTimeout(5000, TimeUnit.MILLISECONDS) //
-//                    .readTimeout(5000, TimeUnit.MILLISECONDS) //
-//                    .build() // 클라이언트 객체
                 val client = OkHttpClient()
 
                 val site = "http://${ServerInfo.SERVER_IP}:8080/App_GroupCharge_Server/login_user.jsp"

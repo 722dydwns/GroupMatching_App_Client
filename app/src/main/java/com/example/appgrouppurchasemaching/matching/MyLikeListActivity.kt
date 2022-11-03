@@ -25,7 +25,6 @@ class MyLikeListActivity : AppCompatActivity() { //'내가' 원하는 매칭 대
 
     //내가 좋아요한 대상의 정보 데이터 모델
     private val likeUserList = mutableListOf<UserDataModel>()
-//    private val likeUserListUid = mutableListOf<String>() //Uid
     private val likeUserMatchingMap = mutableMapOf<String, Matching>() // Key: Uid, Value: Matching
 
     lateinit var listviewAdapter : ListViewAdapter
@@ -45,8 +44,6 @@ class MyLikeListActivity : AppCompatActivity() { //'내가' 원하는 매칭 대
         val userListView = binding.userListView  // findViewById<ListView>(R.id.userListView)
         listviewAdapter = ListViewAdapter(this, likeUserList)
         userListView.adapter = listviewAdapter
-
-
 
         //내가 좋아요한 유저 클릭 시, 메시지 보내기 창 떠서 메시지 보낼 수 있게 하고
         //상대방에게 알림 띄워주고
@@ -146,15 +143,10 @@ class MyLikeListActivity : AppCompatActivity() { //'내가' 원하는 매칭 대
                 for (dataModel in dataSnapshot.children) {
                     val user = dataModel.getValue(UserDataModel::class.java)
 
-                    // 전체 유저중에 내가 좋아요한 사람들 '정보' 이면서 나 자신은 아닌 대상만 add함
-//                    if(likeUserListUid.contains(user?.uid) && user?.uid != uid) {
-//                        likeUserList.add(user!!)
-//                    }
                     if (likeUserMatchingMap.containsKey(user?.uid) && user?.uid != uid) {
                         user!!.isMatch = likeUserMatchingMap[user!!.uid]!!.isMatch
                         likeUserList.add(user!!)
                     }
-//                    likeUserList.reverse() //역순
                 }
                 listviewAdapter.notifyDataSetChanged() //다시 데이터 그려주기 리스트뷰에
             }

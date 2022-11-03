@@ -196,13 +196,6 @@ class BoardReadFragment : Fragment() { //게시글 읽기 프래그먼트 화면
                     if (user?.nickname.toString().equals(UserNickName)) {
                         //회원 데이터 중 해당 닉네임 갖는 데이터 존재할 경우
 
-                        /**
-                         * 죽은 코드 주석처리
-                         */
-//                        val act = activity as BoardMainActivity
-//                        act.usersDataList.add(user!!) //여기서 액티비티 단위로 관리하는 리스트 변수에 add에 담음
-
-
                         userLikeOtherUser(MyUid, user!!.uid.toString())
                         //-> 파이어베이스 상에 현재 로그인 uid 하위에 담은 매칭 대상 uid 담음
                     }
@@ -220,39 +213,6 @@ class BoardReadFragment : Fragment() { //게시글 읽기 프래그먼트 화면
     private fun userLikeOtherUser(myUid: String, otherUid: String) {
         //나의 uid를 상위에, 하위에는 내가 좋아요한 uid 회원들을 나열하는 구조로 DB에 저장
         FirebaseRef.addUserMatching(myUid, otherUid)
-
-        /**
-         * 죽은 코드 주석처리
-         */
-//        getOtherUserLikeList(otherUid) // 내가 좋아요한 상대의 좋아요 리스트 불러오기
     }
 
-    /**
-     * 죽은 코드 주석처리
-     */
-//    //대상의 '좋아요 리스트'를 다시 가져오기
-//    private fun getOtherUserLikeList(otherUid: String) {
-//        val postListener = object : ValueEventListener {
-//            override fun onDataChange(dataSnapshot: DataSnapshot) {
-//                //대상의 좋아요 리스트 속에 내 Uid 가 존재하는 지 확인 -> 있다면 매칭
-//                for (dataModel in dataSnapshot.children) {
-//                 //   Log.d("Test", dataModel.key.toString())
-//                    val likeUserKey = dataModel.key.toString()
-//
-//                    //내가 원하는 대상 == 나를 원하는 대상
-//                    if(likeUserKey.equals(MyUid)) {
-//                      //  Log.d("Test", likeUserKey)
-//                        //알림 띄우기
-//                    }
-//                }
-//            }
-//            override fun onCancelled(databaseError: DatabaseError) {
-//                // Getting Post failed, log a message
-//                Log.w("test", "loadPost:onCancelled", databaseError.toException())
-//            }
-//        }
-//
-//        //내가 좋아요한 대상의 uid가 다시 좋아하고 있는 대상 목록을 가져올 거임
-//        FirebaseRef.userWantMatchingRef.child(otherUid).addValueEventListener(postListener)
-//    }
 }

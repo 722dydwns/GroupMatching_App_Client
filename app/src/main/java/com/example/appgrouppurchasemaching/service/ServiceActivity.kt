@@ -208,27 +208,6 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
         bindService(serviceIntent, connection, BIND_AUTO_CREATE)
     }
 
-    /**
-    fun setLocationLatLngIfThisClickedByMessage() {
-        val intent = getIntent()
-
-        if (intent.hasExtra("isClickedByMessage")) {
-            // 메세지에서 공유된 위치를 클릭해서 들어온 경우
-            Log.d("test", "intent.hashExtra(\"isClickedByMessage\"): ${intent.hasExtra("isClickedByMessage")}")
-
-            // "장소선택" 버튼 숨김
-            binding.promiseBtn.visibility = View.GONE
-
-            Log.d("test", "this::googleMap.isInitialized: ${this::googleMap.isInitialized}")
-            if (this::googleMap.isInitialized) {
-                val latitude = intent.getDoubleExtra("latitude", 35.0)
-                val longitude = intent.getDoubleExtra("longitude", 35.0)
-                searchLocationByLatLng(latitude, longitude)
-            }
-        }
-    }
-    */
-
     // 지도가 준비가 완료되면 호출되는 메서드
     override fun onMapReady(p0: GoogleMap) {
         Log.d("test", "onMapReady called")
@@ -248,13 +227,6 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
             googleMap.isMyLocationEnabled = true
         }
 
-
-        /**
-        val intent = getIntent()
-        if (intent.hasExtra("isClickedByMessage")) {
-            setLocationLatLngIfThisClickedByMessage()
-        } else {
-        */
             //서비스에서 현 위치값을 가져오는 쓰레드 가동시키기
             serviceRunning = true
             thread {
@@ -273,9 +245,6 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
                     }
                 }
             }
-        /**
-        }
-        */
     }
 
     fun setUserLocation(location:Location, zoom : Boolean){

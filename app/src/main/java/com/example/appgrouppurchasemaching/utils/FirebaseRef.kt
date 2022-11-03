@@ -13,11 +13,6 @@ class FirebaseRef { //RealDB 저장 규격 짜기
         val userInfoRef = database.getReference("userInfo")//회원 정보는 이 경로로
 
         /**
-         * 아래 이거 뭔지 몰라서 냅두는데, 필요 없으면 지우는게 좋을거 같아요
-         */
-//        val userMsgRef = database.getReference("userMsg") // 메시지 내용 데이터는 이 경로로
-
-        /**
          * Firebase Realtime database - "chats" reference
          */
         val chatsRef = database.getReference("chats")

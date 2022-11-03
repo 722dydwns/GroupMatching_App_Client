@@ -66,13 +66,6 @@ class BoardMainActivity : AppCompatActivity() { //게시판 메인 액티비티
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-//        // 키보드 내리기
-//        val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-//        inputMethodManager.hideSoftInputFromWindow(
-//            currentFocus?.windowToken,
-//            InputMethodManager.HIDE_IMPLICIT_ONLY
-//        )
-
         //binding
         binding = ActivityBoardMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
