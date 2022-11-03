@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat.getSystemService
 import com.example.appgrouppurchasemaching.ServerInfo
@@ -17,7 +18,10 @@ import com.example.appgrouppurchasemaching.databinding.FragmentLoginBinding
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 class LoginFragment : Fragment() { //로그인 프래그먼트
 
@@ -83,7 +87,12 @@ class LoginFragment : Fragment() { //로그인 프래그먼트
 
             //-> 서버 통신 작업 수행
             thread {
-                val client = OkHttpClient() //클라이언트 객체
+//                val client = OkHttpClient().newBuilder()
+//                    .connectTimeout(5000, TimeUnit.MILLISECONDS) //
+//                    .writeTimeout(5000, TimeUnit.MILLISECONDS) //
+//                    .readTimeout(5000, TimeUnit.MILLISECONDS) //
+//                    .build() // 클라이언트 객체
+                val client = OkHttpClient()
 
                 val site = "http://${ServerInfo.SERVER_IP}:8080/App_GroupCharge_Server/login_user.jsp"
 
@@ -95,6 +104,7 @@ class LoginFragment : Fragment() { //로그인 프래그먼트
 
                 //2) 요청
                 val request = Request.Builder().url(site).post(formBody).build()
+
                 //3) 요청 실행 후 결과는 response로 받음
                 val response = client.newCall(request).execute() //요청에 대한 응답은 response로 받음
 

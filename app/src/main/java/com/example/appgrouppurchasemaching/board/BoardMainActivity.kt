@@ -88,7 +88,7 @@ class BoardMainActivity : AppCompatActivity() { //게시판 메인 액티비티
         thread {
             val client = OkHttpClient()
             val site = "http://${ServerInfo.SERVER_IP}:8080/App_GroupCharge_Server/get_board_list.jsp"
-                                    //GET 방식으로 그냥 가져오기만 하면 되기 때문
+            //GET 방식으로 그냥 가져오기만 하면 되기 때문
             val request = Request.Builder().url(site).get().build()
             val response = client.newCall(request).execute()
 
@@ -110,7 +110,7 @@ class BoardMainActivity : AppCompatActivity() { //게시판 메인 액티비티
         }
 
         //초기 화면 프래그먼트 설정
-       // fragmentController("board_main", false, false)
+        // fragmentController("board_main", false, false)
         fragmentController("menu_controller", false, false)
 
         //test
