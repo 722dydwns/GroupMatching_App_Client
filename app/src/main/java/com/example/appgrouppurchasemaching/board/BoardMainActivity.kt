@@ -91,8 +91,8 @@ class BoardMainActivity : AppCompatActivity() { //게시판 메인 액티비티
                     val boardName = obj.getString("board_name")
 
                     //액티비티 속 데이터인 List에 담기
-                    boardIndexList.add(boardIdx)
-                    boardNameList.add(boardName)
+                    boardIndexList.add(boardIdx) //카테고리 항목 채울 idx 리스트
+                    boardNameList.add(boardName) //카테고리 항목 채울 name 리스트
                 }
             }
         }

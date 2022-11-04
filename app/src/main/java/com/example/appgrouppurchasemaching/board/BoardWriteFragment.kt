@@ -178,7 +178,6 @@ class BoardWriteFragment : Fragment() {//글쓰기 프래그먼트 화면
                             val filePath = requireContext().getExternalFilesDir(null).toString()
                             val fileName = "/temp_${System.currentTimeMillis()}.jpg"
                             val picPath = "$filePath/$fileName"
-                            Log.d("test", "picPath: $picPath")
 
                             file = File(picPath)
                             val fos = FileOutputStream(file)
@@ -191,11 +190,7 @@ class BoardWriteFragment : Fragment() {//글쓰기 프래그먼트 화면
                         }
 
                         val formBody = builder1.build() //생성
-                        /* formBody logging
-                        var buf = Buffer()
-                        formBody.writeTo(buf)
-                        Log.d("test", "buf read: ${buf.readUtf8()}")
-                         */
+
                         //요청Request
                         val request = Request.Builder().url(site).post(formBody).build()
                         //요청 반환값은 response 변수로 받음
@@ -243,7 +238,7 @@ class BoardWriteFragment : Fragment() {//글쓰기 프래그먼트 화면
             }
         }
 
-        //스피너 어댑터 생성 - 액티비티 속 데이터 가져와서 스피너 목록 구성
+        //글 작성 시, 선택 위한 스피너 어댑터 생성 - 액티비티 속  데이터 가져와서 스피너 목록 구성
         val spinnerAdapter = ArrayAdapter(
             requireContext(),
             android.R.layout.simple_spinner_dropdown_item,
