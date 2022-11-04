@@ -31,11 +31,6 @@ class BoardMainActivity : AppCompatActivity() { //게시판 메인 액티비티
     //프래그먼트 컨트롤 변수
     lateinit var currentFragment : Fragment
 
-    /**
-     * 죽은 코드 주석처리
-     */
-//    val usersDataList = mutableListOf<UserDataModel>() //사용자 정보 객체 단위로 저장하는데
-
     //게시판 목록 '이름'들을 받을 List<> 변수
     val boardNameList = ArrayList<String>()
     //게시판 목록 'idx' 받을 List<> 변수
@@ -103,7 +98,6 @@ class BoardMainActivity : AppCompatActivity() { //게시판 메인 액티비티
         }
 
         //초기 화면 프래그먼트 설정
-        // fragmentController("board_main", false, false)
         fragmentController("menu_controller", false, false)
 
         //test

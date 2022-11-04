@@ -78,7 +78,7 @@ class MainActivity : AppCompatActivity() { //main 액티비티
 
                     } else {
                         // If sign in fails, display a message to the user.
-                       // Log.w("test", "failure", task.exception)
+                        Log.w("test", "failure", task.exception)
                     }
                 }
         }

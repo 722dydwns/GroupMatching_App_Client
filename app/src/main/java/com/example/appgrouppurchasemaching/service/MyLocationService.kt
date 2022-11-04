@@ -39,7 +39,6 @@ class MyLocationService : Service() { // 위치 서비스
             val builder = NotificationCompat.Builder(this, "myLocationService")
             builder.setSmallIcon(android.R.drawable.ic_menu_mylocation)
             builder.setContentTitle("현재 위치 측정 중")
-            //builder.setContentText("현재 위치를 측정 중 입니다.")
             val notifiaction = builder.build()
             startForeground(10, notifiaction)
         }
