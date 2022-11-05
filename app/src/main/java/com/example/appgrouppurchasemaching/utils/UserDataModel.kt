@@ -6,8 +6,6 @@ class UserDataModel (
     val nickname : String? = null,
     val userId : String? = null,
     val userPw : String? = null,
-
-    // Flag for matching status.
     // Used in MyLikeListActivity, OtherLikeListActivity
     var isMatch : Boolean? = null
 )
