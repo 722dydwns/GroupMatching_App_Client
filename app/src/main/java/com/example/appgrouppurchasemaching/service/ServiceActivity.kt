@@ -426,35 +426,6 @@ class ServiceActivity : AppCompatActivity() , OnMapReadyCallback { //서비스 �
         }
     }
 
-    fun searchLocationByLatLng(latitude: Double, longitude: Double) {
-        val MAX_RESULTS = 1
-        val geoCoder = Geocoder(this)
-
-        Log.d("test_doin", "searchLocationByLatLng latitude(${latitude}), longitude(${longitude}")
-
-        try{
-            var addressList : List<Address>? = null
-            //addressList = geoCoder.getFromLocation(latitude, longitude, MAX_RESULTS)
-            addressList = geoCoder.getFromLocationName("회기역", MAX_RESULTS)
-
-            // MAX_RESULTS == 1 이니까 addressList 는 항상 길이가 1 이하
-            val address = addressList[0]
-            val latLng = LatLng(address.latitude, address.longitude)
-
-            // 가져온 주소 기반으로 다시 myLocation 설정
-            myLocation?.latitude = latLng.latitude
-            myLocation?.longitude = latLng.longitude
-
-            // 지도에 연결
-            googleMap!!.addMarker(MarkerOptions().position(latLng).title("선택된 위치"))
-            googleMap!!.animateCamera(CameraUpdateFactory.newLatLng(latLng))
-
-            hideKeyboard()
-        }catch(e:IOException){
-            e.printStackTrace()
-        }
-    }
-
     //키보드 내리기 메소드
     fun hideKeyboard() {
         // 키보드 내리기
