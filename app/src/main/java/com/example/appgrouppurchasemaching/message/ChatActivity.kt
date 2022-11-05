@@ -47,7 +47,6 @@ class ChatActivity : AppCompatActivity() { //'채팅' 액티비티 화면
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Log.d("test_doin", "ChatActivity.onCreate called")
         binding = ActivityChatBinding.inflate(layoutInflater)
 
         setContentView(binding.root)
