@@ -10,13 +10,13 @@ package com.example.appgrouppurchasemaching.matching
  * @property[user1Uid] 매칭할/된 사람 1
  * @property[user2Uid] 매칭할/된 사람 2
  * @property[isMatch] 매칭 성공 여부. 기본값 false
- * @property[boardIdx] 매칭한 게시물 IDX. (nullable) <-- 멤버만 추가하고 관련 기능 아직 추가 x
  */
 class Matching() {
     constructor(user1Uid: String, user2Uid: String) : this() {
         this.user1Uid = user1Uid
         this.user2Uid = user2Uid
     }
+    //멤버
     var user1Uid: String = ""
     var user2Uid: String = ""
     var isMatch: Boolean = false
