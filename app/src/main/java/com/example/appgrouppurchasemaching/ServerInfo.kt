@@ -9,10 +9,10 @@ class ServerInfo { //'서버' IP 정보 객체
 
 
      //스터디카페
-//     const val SERVER_IP = "172.30.1.11"
+    const val SERVER_IP = "172.30.1.14"
 
      //카페 커피빈 172.16.100.104
-     const val SERVER_IP = "172.30.1.92"
+     //const val SERVER_IP = "172.16.101.223"
 
      //const val SERVER_IP = "192.168.1.91"
 
