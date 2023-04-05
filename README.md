@@ -4,9 +4,11 @@
 
 ## 🟦 졸업 작품 설명 팜플렛
 
+<img width="290" alt="image" src="https://user-images.githubusercontent.com/39732720/229996298-a715cdcc-9185-4505-ae09-fe29adca7cbb.png">
 
 
 
+---
 
 ## 🟦 프로젝트 생성
 
