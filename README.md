@@ -2,6 +2,12 @@
 
 # 졸업작품 | AppGroupPurchaseMatching 안드로이드 어플
 
+## 🟦 졸업 작품 설명 팜플렛
+
+
+
+
+
 ## 🟦 프로젝트 생성
 
 ### ▶️ App수준의 build.gradle에 ViewBinding 설정하기
